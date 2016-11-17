@@ -39,4 +39,42 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
 
+find_package(OROCOS-RTT REQUIRED COMPONENTS rtt-scripting rtt-typekit)
+if (NOT OROCOS-RTT_FOUND)
+  message (FATAL_ERROR "\nCould not find Orocos-RTT. Please use the shell command\n 'source orocos_toolchain/env.sh' and then run cmake again.")
+endif()
+
+include(${OROCOS-RTT_USE_FILE_PATH}/UseOROCOS-RTT.cmake )
+
+set (Eigen_INCLUDE_DIRS "/usr/include/eigen3")
+find_package(orocos_kdl REQUIRED)
+find_package(Boost COMPONENTS thread REQUIRED)
+find_package(srdfdom_advr REQUIRED)
+find_package(XBotCoreModel REQUIRED)
+
+find_package(RST-RT REQUIRED)
+message(STATUS "RST-RT version: ${RST-RT_VERSION}")
+include_directories(BEFORE SYSTEM ${RST-RT_INCLUDE_DIRS})
+add_definitions(${RST-RT_CFLAGS})
+link_directories(${RST-RT_LIBRARY_DIR} ${RST-RT_LIBRARY_DIRS})
+
+find_package(PkgConfig REQUIRED)
+pkg_search_module(TINYXML REQUIRED tinyxml)
+if(NOT TINYXML_INCLUDE_DIR)
+        find_path("/usr/include" tinyxml.h)
+        find_library(TINYXML_LIBRARY NAMES tinyxml)
+        set(TINYXML_LIBRARIES ${TINYXML_LIBRARY})
+    set(TINYXML_INCLUDE_DIRS ${TINYXML_INCLUDE_DIR})
+    set(TINYXML_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
+endif()
+message(STATUS "TINYXML_VERSION: ${TINYXML_VERSION}")
+include_directories(BEFORE SYSTEM ${TINYXML_INCLUDE_DIRS})
+link_directories(${TINYXML_LIBRARY_DIR})
+message(STATUS "TINYXML_LIBRARIES: ${TINYXML_LIBRARIES}")
+message(STATUS "TINYXML_LIBRARY_DIR: ${TINYXML_LIBRARY_DIR}")
+message(STATUS "TINYXML_INCLUDE_DIR: ${TINYXML_INCLUDE_DIRS}")
+message(STATUS "TINYXML_LIBRARY: ${TINYXML_LIBRARY}")
+
+find_package(COMAN_shared REQUIRED)
+
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
