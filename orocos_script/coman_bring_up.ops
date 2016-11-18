@@ -1,0 +1,16 @@
+#!/usr/bin/env deployer
+
+import("eigen_typekit")
+import("kdl_typekit")
+import("rst-rt_typekit")
+import("rtt_rsbcomm")
+import("rtt_coman")
+require("os")
+
+loadComponent("coman","cogimon::rtt_coman")
+
+setActivity("coman",0,10,ORO_SCHED_OTHER)
+
+var string urdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman/model.urdf"
+var string srdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman/coman.srdf"
+coman.loadURDFAndSRDF(urdf_path, srdf_path)
