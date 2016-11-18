@@ -77,4 +77,38 @@ message(STATUS "TINYXML_LIBRARY: ${TINYXML_LIBRARY}")
 
 find_package(COMAN_shared REQUIRED)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+include_directories(
+                  include
+                  ${Boost_INCLUDE_DIR}
+                  ${Eigen_INCLUDE_DIRS}
+                  ${orocos_kdl_INCLUDE_DIRS}
+                  ${USE_OROCOS_INCLUDE_DIRS}
+                  ${RST-RT_INCLUDE_DIRS}
+                  ${TINYXML_INCLUDE_DIRS}
+                  ${srdfdom_advr_INCLUDE_DIRS}
+                  ${XBotCoreModel_INCLUDE_DIRS}
+                  ${COMAN_shared_INCLUDE_DIRS}   
+)
+
+file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
+
+orocos_component(${PROJECT_NAME} 
+src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp
+${rtt_coman_INCLUDES})
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
+
+target_link_libraries(${PROJECT_NAME}
+   ${USE_OROCOS_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
+   ${OROCOS-RTT_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${RST-RT_LIBRARIES}
+   ${TINYXML_LIBRARIES}
+   ${srdfdom_advr_LIBRARIES}
+   ${XBotCoreModel_LIBRARIES}
+   ${COMAN_shared_LIBRARIES}
+)
+
+install (TARGETS
+         LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+orocos_generate_package(INCLUDE_DIRS include)
