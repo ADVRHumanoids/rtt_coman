@@ -75,7 +75,7 @@ message(STATUS "TINYXML_LIBRARY_DIR: ${TINYXML_LIBRARY_DIR}")
 message(STATUS "TINYXML_INCLUDE_DIR: ${TINYXML_INCLUDE_DIRS}")
 message(STATUS "TINYXML_LIBRARY: ${TINYXML_LIBRARY}")
 
-find_package(COMAN_shared REQUIRED)
+#find_package(COMAN_shared REQUIRED)
 
 include_directories(
                   include
@@ -87,7 +87,7 @@ include_directories(
                   ${TINYXML_INCLUDE_DIRS}
                   ${srdfdom_advr_INCLUDE_DIRS}
                   ${XBotCoreModel_INCLUDE_DIRS}
-                  ${COMAN_shared_INCLUDE_DIRS}   
+                  "$ENV{ROBOTOLOGY_ROOT}/robots/COMAN_shared/include"
 )
 
 file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
@@ -106,7 +106,7 @@ target_link_libraries(${PROJECT_NAME}
    ${TINYXML_LIBRARIES}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
-   ${COMAN_shared_LIBRARIES}
+   "$ENV{ROBOTOLOGY_ROOT}/robots/COMAN_shared/lib/librobolli.so"
 )
 
 install (TARGETS

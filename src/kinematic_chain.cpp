@@ -17,6 +17,24 @@ KinematicChain::KinematicChain(const std::string& chain_name, const std::vector<
     RTT::log(RTT::Info) << "Joints: " << RTT::endlog();
     for(unsigned int i = 0; i < _joint_names.size(); ++i)
         RTT::log(RTT::Info) << "    " << _joint_names[i] << RTT::endlog();
+
+    //HARDCODED STUFFS...SORRY...
+    if(chain_name.compare("left_arm") == 0 && _joint_names.size() == 4)
+    {
+        RTT::log(RTT::Info) <<"COMAN_NO_FOREARMS, left_arm"<< RTT::endlog();
+        _boardsID.reset(new boardsID(0, chain_name));
+    }
+    else if(chain_name.compare("right_arm") == 0 && _joint_names.size() == 4)
+    {
+        RTT::log(RTT::Info) <<"COMAN_NO_FOREARMS, right_arm"<< RTT::endlog();
+        _boardsID.reset(new boardsID(0, chain_name));
+    }
+    else
+        _boardsID.reset(new boardsID(1, chain_name));
+
+    RTT::log(RTT::Info)<<"Boards ID: "<<RTT::endlog();
+    for(unsigned int i = 0; i < _boardsID->getBoardsID().size(); ++i)
+        RTT::log(RTT::Info) << "    " << _boardsID->getBoardsID()[i] << RTT::endlog();
 }
 
 std::vector<RTT::base::PortInterface*> KinematicChain::getAssociatedPorts() {

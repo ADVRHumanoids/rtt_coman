@@ -21,13 +21,15 @@
 
 
 #include <control_modes.h>
-//#include <kinematic_chain.h>
+#include <kinematic_chain.h>
 #include <boost/shared_ptr.hpp>
 
 #include <srdfdom_advr/model.h>
 #include <urdf/model.h>
 #include <XBotCoreModel.h>
 #include <parser.h>
+
+#include <Boards_ctrl_ext.h>
 
 namespace cogimon {
 
@@ -44,22 +46,26 @@ protected:
     //std::string getControlMode(const std::string& kinematic_chain);
     //std::vector<std::string> getControlAvailableMode(const std::string& kinematic_chain);
     //std::string printKinematicChainInformation(const std::string& kinematic_chain);
+    bool loadYAML(const std::string& YAML_path);
     bool loadURDFAndSRDF(const std::string& URDF_path, const std::string& SRDF_path);
     //std::map<std::string, std::vector<std::string> > getKinematiChainsAndJoints();
 
 
 
 
-    //std::map<std::string, boost::shared_ptr<KinematicChain>> kinematic_chains;
+    std::map<std::string, boost::shared_ptr<KinematicChain>> kinematic_chains;
 
     XBot::XBotCoreModel _xbotcore_model;
     bool _models_loaded;
+    bool _yaml_is_loaded;
 
     gain_parser gains;
 
 
 private:
     bool is_configured;
+
+    boost::shared_ptr<Boards_ctrl_ext> _boards;
 };
 
 }

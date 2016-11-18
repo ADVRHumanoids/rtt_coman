@@ -14,8 +14,8 @@ setActivity("coman",0,10,ORO_SCHED_OTHER)
 var string YAML_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/COMAN_shared/examples/walking/config.yaml"
 coman.loadYAML(YAML_path)
 
-var string urdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman/model.urdf"
-var string srdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman/coman.srdf"
+var string urdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman-no-forearms/model.urdf"
+var string srdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman-no-forearms/coman_no_forearms.srdf"
 coman.loadURDFAndSRDF(urdf_path, srdf_path)
 
 coman.configure()
