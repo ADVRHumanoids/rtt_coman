@@ -7,9 +7,16 @@ import("rtt_rsbcomm")
 import("rtt_coman")
 require("os")
 
+## EXTRA FOR ROS
+import("rtt_ros")
+import("rtt_rosnode")
+import("rtt_sensor_msgs")
+import("orocos_ros_joint_state_publisher")
+##
+
 loadComponent("coman","cogimon::rtt_coman")
 
-setActivity("coman",0,10,ORO_SCHED_OTHER)
+setActivity("coman",0.001,10,ORO_SCHED_OTHER)
 
 var string YAML_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/COMAN_shared/examples/walking/config.yaml"
 coman.loadYAML(YAML_path)
@@ -19,3 +26,20 @@ var string srdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-mo
 coman.loadURDFAndSRDF(urdf_path, srdf_path)
 
 coman.configure()
+
+var double M_PI = 3.14159265359;
+coman.setOffSet("LShLat", 90.0*M_PI/180.0)
+coman.setOffSet("RShLat", -90.0*M_PI/180.0)
+
+coman.start()
+
+## OROCOS_ROS_JOINT_STATE_PUBLISHER
+loadComponent("coman_ros_joint_state_publisher","orocos_ros_joint_state_publisher")
+
+addPeer("coman_ros_joint_state_publisher", "coman")
+coman_ros_joint_state_publisher.attachToRobot("coman")
+coman_ros_joint_state_publisher.loadURDFAndSRDF(urdf_path,srdf_path)
+
+coman_ros_joint_state_publisher.configure()
+coman_ros_joint_state_publisher.start()
+##

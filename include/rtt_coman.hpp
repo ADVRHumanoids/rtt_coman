@@ -30,6 +30,7 @@
 #include <parser.h>
 
 #include <Boards_ctrl_ext.h>
+#include <utils.h>
 
 namespace cogimon {
 
@@ -42,13 +43,14 @@ public:
 
 protected:
     //bool setControlMode(const std::string& kinematic_chain, const std::string& controlMode);
-    //std::vector<std::string> getKinematiChains();
-    //std::string getControlMode(const std::string& kinematic_chain);
-    //std::vector<std::string> getControlAvailableMode(const std::string& kinematic_chain);
-    //std::string printKinematicChainInformation(const std::string& kinematic_chain);
+    std::vector<std::string> getKinematiChains();
+    std::string getControlMode(const std::string& kinematic_chain);
+    std::vector<std::string> getControlAvailableMode(const std::string& kinematic_chain);
+    std::string printKinematicChainInformation(const std::string& kinematic_chain);
     bool loadYAML(const std::string& YAML_path);
     bool loadURDFAndSRDF(const std::string& URDF_path, const std::string& SRDF_path);
-    //std::map<std::string, std::vector<std::string> > getKinematiChainsAndJoints();
+    std::map<std::string, std::vector<std::string> > getKinematiChainsAndJoints();
+    void setOffSet(const std::string& joint_name, const double offset);
 
 
 
@@ -66,6 +68,8 @@ private:
     bool is_configured;
 
     boost::shared_ptr<Boards_ctrl_ext> _boards;
+
+    ts_bc_data_t   _ts_bc_data[MAX_DSP_BOARDS];
 };
 
 }
