@@ -6,7 +6,7 @@ KinematicChain::KinematicChain(const std::string& chain_name, const std::vector<
                                RTT::DataFlowInterface& ports, ts_bc_data_t *boards_data):
     _kinematic_chain_name(chain_name),
     _ports(ports),
-    _current_control_mode(std::string(ControlModes::JointPositionCtrl)),
+    _current_control_mode(""),
     _joint_names(joint_names),
     _boards_data(boards_data)
 {
