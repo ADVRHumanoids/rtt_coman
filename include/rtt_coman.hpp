@@ -39,10 +39,13 @@ public:
     rtt_coman(std::string const& name);
     bool configureHook();
     void updateHook();
+    bool startHook();
+    void stopHook();
+
     virtual ~rtt_coman() {}
 
 protected:
-    //bool setControlMode(const std::string& kinematic_chain, const std::string& controlMode);
+    bool setControlMode(const std::string& kinematic_chain, const std::string& controlMode);
     std::vector<std::string> getKinematiChains();
     std::string getControlMode(const std::string& kinematic_chain);
     std::vector<std::string> getControlAvailableMode(const std::string& kinematic_chain);
@@ -66,10 +69,12 @@ protected:
 
 private:
     bool is_configured;
+    bool is_controlled;
 
     boost::shared_ptr<Boards_ctrl_ext> _boards;
 
     ts_bc_data_t   _ts_bc_data[MAX_DSP_BOARDS];
+    int _tx_position_desired_mRAD[MAX_DSP_BOARDS];
 };
 
 }

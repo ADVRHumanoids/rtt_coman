@@ -32,8 +32,8 @@ KinematicChain::KinematicChain(const std::string& chain_name, const std::vector<
         _boardsID.reset(new boardsID(1, chain_name));
 
     RTT::log(RTT::Info)<<"Boards ID: "<<RTT::endlog();
-    for(unsigned int i = 0; i < _boardsID->getBoardsID().size(); ++i)
-        RTT::log(RTT::Info) << "    " << _boardsID->getBoardsID()[i] << RTT::endlog();
+    for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i)
+        RTT::log(RTT::Info) << "    " << _boardsID->boards_id[i] << RTT::endlog();
 
     _number_of_dofs = _joint_names.size();
 }
@@ -59,23 +59,23 @@ bool KinematicChain::initKinematicChain(const cogimon::gains& gains_)
     }
 
 
-//    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointPositionCtrl)) != controllers.end()){
-//        if(!setController(std::string(ControlModes::JointPositionCtrl)))
-//            return false;
-//        else
-//            RTT::log(RTT::Info)<<std::string(ControlModes::JointPositionCtrl)<<" activated!"<<RTT::endlog();
-//    }
-//    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointImpedanceCtrl)) != controllers.end()){
-//        if(!setController(std::string(ControlModes::JointImpedanceCtrl)))
-//            return false;
-//        else
-//            RTT::log(RTT::Info)<<std::string(ControlModes::JointImpedanceCtrl)<<" activated!"<<RTT::endlog();
-//    }
-//    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointTorqueCtrl)) != controllers.end()){
-//        if(!setController(std::string(ControlModes::JointTorqueCtrl)))
-//            return false;
-//        else
-//            RTT::log(RTT::Info)<<std::string(ControlModes::JointTorqueCtrl)<<" activated!"<<RTT::endlog();}
+    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointPositionCtrl)) != controllers.end()){
+        if(!setController(std::string(ControlModes::JointPositionCtrl)))
+            return false;
+        else
+            RTT::log(RTT::Info)<<std::string(ControlModes::JointPositionCtrl)<<" activated!"<<RTT::endlog();
+    }
+    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointImpedanceCtrl)) != controllers.end()){
+        if(!setController(std::string(ControlModes::JointImpedanceCtrl)))
+            return false;
+        else
+            RTT::log(RTT::Info)<<std::string(ControlModes::JointImpedanceCtrl)<<" activated!"<<RTT::endlog();
+    }
+    if(std::find(controllers.begin(), controllers.end(), std::string(ControlModes::JointTorqueCtrl)) != controllers.end()){
+        if(!setController(std::string(ControlModes::JointTorqueCtrl)))
+            return false;
+        else
+            RTT::log(RTT::Info)<<std::string(ControlModes::JointTorqueCtrl)<<" activated!"<<RTT::endlog();}
 
 
     setFeedBack(); //We consider, for now, that the full feedback is available
@@ -199,6 +199,11 @@ void KinematicChain::setInitialImpedance()
     impedance_controller->joint_cmd_fs = RTT::FlowStatus::NewData;
 }
 
+std::vector<int> KinematicChain::getBoardsID()
+{
+    return _boardsID->boards_id;
+}
+
 bool KinematicChain::setControlMode(const std::string &controlMode)
 {
     if(controlMode != ControlModes::JointPositionCtrl &&
@@ -257,9 +262,17 @@ void KinematicChain::getCommand()
     }
 }
 
-void KinematicChain::move()
+void KinematicChain::move(int *position_desired)
 {
     ///NEEDS ROBOLLI IMPLEMENTATION
+    if(_current_control_mode == ControlModes::JointPositionCtrl){
+        for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
+            position_desired[_boardsID->boards_id[i]-1] =
+                    RAD2mRAD(position_controller->joint_cmd.angles[i]-
+                             _boardsID->offsets[_boardsID->boards_id[i]]);
+            std::cout<<"position_controller "<<position_controller->joint_cmd.angles[i]<<std::endl;
+    }}
+
 
 //    if(_current_control_mode == ControlModes::JointPositionCtrl){
 //        std::vector<std::string> joint_scoped_names = getJointScopedNames();
@@ -296,7 +309,7 @@ std::string KinematicChain::printKinematicChainInformation()
     for(unsigned int i = 0; i < controller_names.size(); ++i)
         controller_names_stream << controller_names[i] << " ";
 
-    std::vector<int> boards_id = _boardsID->getBoardsID();
+    std::vector<int> boards_id = _boardsID->boards_id;
     std::stringstream boards_id_stream;
     for(unsigned int i = 0; i < boards_id.size(); ++i)
         boards_id_stream << boards_id[i] << " ";

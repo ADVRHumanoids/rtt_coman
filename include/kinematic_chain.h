@@ -53,25 +53,21 @@ public:
         int s = r_leg.size() + l_leg.size() + waist.size() + neck.size() + r_arm.size() + l_arm.size();
         for(unsigned int i = 0; i < s; ++i)
             offsets.push_back(0.0);
-//        offsets[17] = -90.*M_PI/180.;
-//        offsets[21] = 90.*M_PI/180.;
-//        offsets[19] = 5.*M_PI/180.;
-    }
 
-    std::vector<int> getBoardsID()
-    {
         if(kin_chain_name.compare("left_arm") == 0)
-            return l_arm;
+            boards_id = l_arm;
         if(kin_chain_name.compare("left_leg") == 0)
-            return l_leg;
+            boards_id = l_leg;
         if(kin_chain_name.compare("right_leg") == 0)
-            return r_leg;
+            boards_id = r_leg;
         if(kin_chain_name.compare("right_arm") == 0)
-            return r_arm;
+            boards_id = r_arm;
         if(kin_chain_name.compare("torso") == 0)
-            return waist;
+            boards_id = waist;
+
     }
 
+    std::vector<int> boards_id;
     std::vector<double> offsets;
 
 private:
@@ -103,9 +99,10 @@ public:
     bool setControlMode(const std::string& controlMode);
     void sense();
     void getCommand();
-    void move();
+    void move(int* position_desired);
     std::string printKinematicChainInformation();
     std::vector<RTT::base::PortInterface*> getAssociatedPorts();
+    std::vector<int> getBoardsID();
 
     boost::shared_ptr<position_ctrl> position_controller;
     boost::shared_ptr<impedance_ctrl> impedance_controller;
@@ -116,7 +113,7 @@ public:
     void setOffSet(const std::string& joint_name, const double offset)
     {
         int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
-        setOffSet(_boardsID->getBoardsID()[pos], offset);
+        setOffSet(_boardsID->boards_id[pos], offset);
     }
 
 private:
@@ -148,7 +145,7 @@ private:
     double getPosition(const std::string& joint_name)
     {
         int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
-        return getPosition(_boardsID->getBoardsID()[pos]);
+        return getPosition(_boardsID->boards_id[pos]);
     }
 
     double getVelocity(const int ID)
@@ -159,7 +156,7 @@ private:
     double getVelocity(const std::string& joint_name)
     {
         int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
-        return getVelocity(_boardsID->getBoardsID()[pos]);
+        return getVelocity(_boardsID->boards_id[pos]);
     }
 
     double getTorque(const int ID)
@@ -170,7 +167,7 @@ private:
     double getTorque(const std::string& joint_name)
     {
         int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
-        return getTorque(_boardsID->getBoardsID()[pos]);
+        return getTorque(_boardsID->boards_id[pos]);
     }
 
     void setOffSet(const int ID, const double offset)

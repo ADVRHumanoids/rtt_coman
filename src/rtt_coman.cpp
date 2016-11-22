@@ -14,10 +14,11 @@ rtt_coman::rtt_coman(const std::string &name):
     TaskContext(name),
     is_configured(false),
     _models_loaded(false),
-    _yaml_is_loaded(false)
+    _yaml_is_loaded(false),
+    is_controlled(false)
 {
-//    this->addOperation("setControlMode", &rtt_coman::setControlMode,
-//                this, RTT::ClientThread);
+    this->addOperation("setControlMode", &rtt_coman::setControlMode,
+                this, RTT::ClientThread);
 
     this->addOperation("getKinematicChains", &rtt_coman::getKinematiChains,
                 this, RTT::ClientThread);
@@ -177,7 +178,26 @@ void rtt_coman::updateHook(){
         it->second->sense();
 
     // MOVE:
+    if(is_controlled)
+    {
+        for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++){
+            it->second->move(_tx_position_desired_mRAD);
 
+            std::vector<int> bid = it->second->getBoardsID();
+            for(unsigned int i = 0; i < bid.size(); ++i){
+                int sensed = _ts_bc_data[bid[i]-1].raw_bc_data.mc_bc_data.Position;
+                int desired = _tx_position_desired_mRAD[bid[i]-1];
+                std::cout<<"desired: "<<desired<<" vs sensed: "<<sensed<<std::endl;
+            }
+        }
+        is_controlled = false;
+
+
+
+        //_boards->set_position(_tx_position_desired_mRAD, sizeof(_tx_position_desired_mRAD));
+
+
+    }
 
 }
 
@@ -232,6 +252,66 @@ std::string rtt_coman::printKinematicChainInformation(const std::string& kinemat
         return "";}
 
     return kinematic_chains[kinematic_chain]->printKinematicChainInformation();
+}
+
+bool rtt_coman::startHook()
+{
+    std::map<std::string, boost::shared_ptr<KinematicChain>>::iterator it;
+    int success = 0;
+
+    for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++){
+        std::vector<int> boards_id = it->second->getBoardsID();
+
+        for(unsigned int i = 0; i < boards_id.size(); ++i)
+            success += _boards->start_stop_single_control(boards_id[i]-1, true); //for now only position control
+
+        if(success == 0){
+            _boards->get_bc_data(_ts_bc_data);
+            it->second->sense();
+            it->second->setControlMode(ControlModes::JointPositionCtrl);
+        }
+
+    }
+
+    if(success == 0){
+        is_controlled = true;
+        return true;}
+    return false;
+}
+
+bool rtt_coman::setControlMode(const std::string& kinematic_chain, const std::string& controlMode)
+{
+    if(isRunning()){
+        std::vector<std::string> chain_names = getKinematiChains();
+        if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
+            log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
+            return false;}
+
+        _boards->get_bc_data(_ts_bc_data);
+        kinematic_chains[kinematic_chain]->sense();
+
+        bool a =  kinematic_chains[kinematic_chain]->setControlMode(controlMode);
+        if(a){
+            is_controlled = true;
+            //change control mode in robolli
+        }
+        else
+            is_controlled = false;
+    }
+    else
+        RTT::log(RTT::Warning)<<"Change control only if component is running"<<RTT::endlog();
+    return is_controlled;
+}
+
+void rtt_coman::stopHook()
+{
+    std::vector<std::string> chain_names = getKinematiChains();
+    for(unsigned int i = 0; i < chain_names.size(); ++i)
+    {
+        std::vector<int> boards_id = kinematic_chains[chain_names[i]]->getBoardsID();
+        for(unsigned int j = 0; j < boards_id.size(); ++j)
+            _boards->start_stop_single_control(boards_id[j]-1, false);
+    }
 }
 
 ORO_CREATE_COMPONENT_LIBRARY()
