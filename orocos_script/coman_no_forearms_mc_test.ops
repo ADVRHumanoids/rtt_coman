@@ -7,7 +7,14 @@ import("rtt_rsbcomm")
 import("rtt_coman")
 require("os")
 
+import("rtt_ros")
+import("rtt_rosnode")
+import("rtt_sensor_msgs")
+import("orocos_ros_joint_state_publisher")
 
+import("motor_controller_test")
+
+##LOAD COMAN
 loadComponent("coman","cogimon::rtt_coman")
 
 setActivity("coman",0.001,10,ORO_SCHED_OTHER)
@@ -27,3 +34,24 @@ coman.setOffSet("RShLat", -90.0*M_PI/180.0)
 
 coman.start()
 
+##LOAD MOTOR CONTROLLER TEST
+loadComponent("test", "motor_controller_test")
+
+addPeer("test", "coman")
+test.attachToRobot("coman")
+test.loadURDFAndSRDF(urdf_path, srdf_path)
+
+test.configure()
+
+test.start()
+
+
+## LOAD OROCOS_ROS_JOINT_STATE_PUBLISHER
+loadComponent("coman_ros_joint_state_publisher","orocos_ros_joint_state_publisher")
+
+addPeer("coman_ros_joint_state_publisher", "coman")
+coman_ros_joint_state_publisher.attachToRobot("coman")
+coman_ros_joint_state_publisher.loadURDFAndSRDF(urdf_path,srdf_path)
+
+coman_ros_joint_state_publisher.configure()
+coman_ros_joint_state_publisher.start()

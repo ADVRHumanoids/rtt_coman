@@ -1,0 +1,63 @@
+#ifndef MOTOR_CONTROLLER_TEST_H
+#define MOTOR_CONTROLLER_TEST_H
+
+#include <rtt/RTT.hpp>
+#include <string>
+#include <rst-rt/robot/JointState.hpp>
+#include <rst-rt/kinematics/JointAngles.hpp>
+#include <rtt/TaskContext.hpp>
+#include <rtt/Component.hpp>
+#include <rtt/Port.hpp>
+#include <urdf/model.h>
+
+class motor_controller_test: public RTT::TaskContext {
+public:
+    motor_controller_test(std::string const & name);
+
+    bool configureHook();
+    bool startHook();
+    void updateHook();
+    void stopHook();
+
+private:
+    std::string _urdf_path;
+    std::string _srdf_path;
+    boost::shared_ptr<urdf::Model> _urdf_model;
+    std::vector<std::string> _joint_list;
+    double _dt_ms;
+    std::string _robot_name;
+    std::map<std::string, std::vector<std::string> > _map_kin_chains_joints;
+
+    std::map<std::string, double> _map_chain_trj_time;
+    std::map<std::string, rstrt::robot::JointState> _map_chain_q0;
+    std::map<std::string, bool> _map_chain_start_trj;
+
+    std::map<std::string, boost::shared_ptr<RTT::InputPort<rstrt::robot::JointState> > > _kinematic_chains_feedback_ports;
+    std::map<std::string, rstrt::robot::JointState> _kinematic_chains_joint_state_map;
+
+    std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_ports;
+    std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_state_map;
+
+    std::map<std::string, std::pair<double, double>> _map_joint_limimts;
+
+    bool loadURDFAndSRDF(const std::string &URDF_path, const std::string &SRDF_path);
+    bool attachToRobot(const std::string& robot_name);
+    bool startTrj(const std::string& chain_name);
+    bool stopTrj(const std::string& chain_name);
+
+    double sin_traj(double q0, double amplitude, double t, double period){
+        return q0 + amplitude*std::sin(t/(period*M_PI));
+    }
+
+    rstrt::kinematics::JointAngles sin_traj(const rstrt::robot::JointState& q0, double amplitude, double t, double period)
+    {
+        rstrt::kinematics::JointAngles tmp(q0.angles.rows());
+        for(unsigned int i = 0; i < q0.angles.rows(); ++i)
+            tmp.angles[i] = sin_traj(q0.angles[i], amplitude, t, period);
+        return tmp;
+    }
+
+    void getJointLimits(std::map<std::string, std::pair<double, double>>& map);
+};
+
+#endif

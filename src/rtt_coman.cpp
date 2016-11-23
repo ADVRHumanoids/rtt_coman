@@ -172,6 +172,8 @@ void rtt_coman::updateHook(){
 
     std::map<std::string, boost::shared_ptr<KinematicChain>>::iterator it;
     // GET COMMANDS:
+    for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++)
+        it->second->getCommand();
 
     // SENSE:
     _boards->get_bc_data(_ts_bc_data);

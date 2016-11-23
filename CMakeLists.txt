@@ -91,6 +91,7 @@ include_directories(
 )
 
 file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
+file(GLOB_RECURSE motor_controller_test_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/test" *.h)
 
 orocos_component(${PROJECT_NAME} 
 src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp
@@ -107,6 +108,22 @@ target_link_libraries(${PROJECT_NAME}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
    "$ENV{ROBOTOLOGY_ROOT}/robots/COMAN_shared/lib/librobolli.so"
+)
+
+orocos_component(motor_controller_test
+src/test/motor_controller_test.cpp
+${motor_controller_test_INCLUDES})
+set_property(TARGET motor_controller_test APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
+
+target_link_libraries(motor_controller_test
+   ${USE_OROCOS_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
+   ${OROCOS-RTT_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${RST-RT_LIBRARIES}
+   ${TINYXML_LIBRARIES}
+   ${srdfdom_advr_LIBRARIES}
+   ${XBotCoreModel_LIBRARIES}
 )
 
 install (TARGETS
