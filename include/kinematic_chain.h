@@ -87,7 +87,8 @@ class KinematicChain {
 public:
     KinematicChain(const std::string& chain_name, const std::vector<std::string>& joint_names,
                    RTT::DataFlowInterface& ports,
-                   ts_bc_data_t* boards_data);
+                   ts_bc_data_t* boards_data,
+                   boost::shared_ptr<Boards_ctrl_ext>& boards);
     ~KinematicChain(){}
 
     std::string getKinematicChainName();
@@ -99,7 +100,7 @@ public:
     bool setControlMode(const std::string& controlMode);
     void sense();
     void getCommand();
-    void move(int* position_desired);
+    void move(int *_tx_position_desired_mRAD);
     std::string printKinematicChainInformation();
     std::vector<RTT::base::PortInterface*> getAssociatedPorts();
     std::vector<int> getBoardsID();
@@ -136,6 +137,7 @@ private:
     boost::shared_ptr<cogimon::gains> _gains;
     boost::shared_ptr<boardsID> _boardsID;
     ts_bc_data_t* _boards_data;
+    boost::shared_ptr<Boards_ctrl_ext> _boards;
 
     double getPosition(const int ID)
     {

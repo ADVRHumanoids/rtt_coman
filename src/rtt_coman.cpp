@@ -17,8 +17,8 @@ rtt_coman::rtt_coman(const std::string &name):
     _yaml_is_loaded(false),
     is_controlled(false)
 {
-    this->addOperation("setControlMode", &rtt_coman::setControlMode,
-                this, RTT::ClientThread);
+//    this->addOperation("setControlMode", &rtt_coman::setControlMode,
+//                this, RTT::ClientThread);
 
     this->addOperation("getKinematicChains", &rtt_coman::getKinematiChains,
                 this, RTT::ClientThread);
@@ -138,7 +138,8 @@ bool rtt_coman::configureHook() {
 
             kinematic_chains.insert(std::pair<std::string, boost::shared_ptr<KinematicChain>>(
                 chain_name, boost::shared_ptr<KinematicChain>(
-                    new KinematicChain(chain_name, enabled_joints_in_chain, *(this->ports()), _ts_bc_data))));
+                    new KinematicChain(chain_name, enabled_joints_in_chain, *(this->ports()), _ts_bc_data,
+                                        _boards))));
         }
         RTT::log(RTT::Info) << "Kinematic Chains map created!" << RTT::endlog();
 
@@ -180,22 +181,11 @@ void rtt_coman::updateHook(){
     // MOVE:
     if(is_controlled)
     {
-        for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++){
+        for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++)
             it->second->move(_tx_position_desired_mRAD);
 
-            std::vector<int> bid = it->second->getBoardsID();
-            for(unsigned int i = 0; i < bid.size(); ++i){
-                int sensed = _ts_bc_data[bid[i]-1].raw_bc_data.mc_bc_data.Position;
-                int desired = _tx_position_desired_mRAD[bid[i]-1];
-                std::cout<<"desired: "<<desired<<" vs sensed: "<<sensed<<std::endl;
-            }
-        }
-        is_controlled = false;
-
-
-
-        //_boards->set_position(_tx_position_desired_mRAD, sizeof(_tx_position_desired_mRAD));
-
+        _boards->set_position(_tx_position_desired_mRAD,
+                              sizeof(int)*MAX_MC_BOARDS);
 
     }
 
@@ -262,15 +252,14 @@ bool rtt_coman::startHook()
     for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++){
         std::vector<int> boards_id = it->second->getBoardsID();
 
+        _boards->get_bc_data(_ts_bc_data);
+        it->second->sense();
+
+        it->second->setControlMode(ControlModes::JointPositionCtrl);
+        it->second->move(_tx_position_desired_mRAD);
+
         for(unsigned int i = 0; i < boards_id.size(); ++i)
-            success += _boards->start_stop_single_control(boards_id[i]-1, true); //for now only position control
-
-        if(success == 0){
-            _boards->get_bc_data(_ts_bc_data);
-            it->second->sense();
-            it->second->setControlMode(ControlModes::JointPositionCtrl);
-        }
-
+            success += _boards->start_stop_single_control(boards_id[i], true); //for now only position control
     }
 
     if(success == 0){
@@ -281,25 +270,22 @@ bool rtt_coman::startHook()
 
 bool rtt_coman::setControlMode(const std::string& kinematic_chain, const std::string& controlMode)
 {
-    if(isRunning()){
-        std::vector<std::string> chain_names = getKinematiChains();
-        if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
-            log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
-            return false;}
+    std::vector<std::string> chain_names = getKinematiChains();
+    if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
+        log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
+        return false;}
 
-        _boards->get_bc_data(_ts_bc_data);
-        kinematic_chains[kinematic_chain]->sense();
+    _boards->get_bc_data(_ts_bc_data);
+    kinematic_chains[kinematic_chain]->sense();
 
-        bool a =  kinematic_chains[kinematic_chain]->setControlMode(controlMode);
-        if(a){
-            is_controlled = true;
-            //change control mode in robolli
-        }
-        else
-            is_controlled = false;
+    bool a =  kinematic_chains[kinematic_chain]->setControlMode(controlMode);
+    if(a){
+        is_controlled = true;
+        //change control mode in robolli, qui ci va una move?
     }
     else
-        RTT::log(RTT::Warning)<<"Change control only if component is running"<<RTT::endlog();
+        is_controlled = false;
+
     return is_controlled;
 }
 

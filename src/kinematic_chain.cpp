@@ -3,12 +3,14 @@
 using namespace cogimon;
 
 KinematicChain::KinematicChain(const std::string& chain_name, const std::vector<std::string> &joint_names,
-                               RTT::DataFlowInterface& ports, ts_bc_data_t *boards_data):
+                               RTT::DataFlowInterface& ports, ts_bc_data_t* boards_data,
+                               boost::shared_ptr<Boards_ctrl_ext>& boards):
     _kinematic_chain_name(chain_name),
     _ports(ports),
     _current_control_mode(""),
     _joint_names(joint_names),
-    _boards_data(boards_data)
+    _boards_data(boards_data),
+    _boards(boards)
 {
     RTT::log(RTT::Info) << "Creating Kinematic Chain " << chain_name << RTT::endlog();
 
@@ -262,41 +264,61 @@ void KinematicChain::getCommand()
     }
 }
 
-void KinematicChain::move(int *position_desired)
+void KinematicChain::move(int* _tx_position_desired_mRAD)
 {
-    ///NEEDS ROBOLLI IMPLEMENTATION
-    if(_current_control_mode == ControlModes::JointPositionCtrl){
-        for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
-            position_desired[_boardsID->boards_id[i]-1] =
-                    RAD2mRAD(position_controller->joint_cmd.angles[i]-
-                             _boardsID->offsets[_boardsID->boards_id[i]]);
-            std::cout<<"position_controller "<<position_controller->joint_cmd.angles[i]<<std::endl;
-    }}
+        if(_current_control_mode == ControlModes::JointPositionCtrl){
+            for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
+                _tx_position_desired_mRAD[_boardsID->boards_id[i]-1] =
+                        (int)(RAD2mRAD(position_controller->joint_cmd.angles[i]-
+                                 _boardsID->offsets[_boardsID->boards_id[i]]));
 
-
-//    if(_current_control_mode == ControlModes::JointPositionCtrl){
-//        std::vector<std::string> joint_scoped_names = getJointScopedNames();
-//        for(unsigned int i = 0; i < joint_scoped_names.size(); ++i)
-//            _gazebo_position_joint_controller->SetPositionTarget(joint_scoped_names[i], position_controller->joint_cmd.angles(i));
-//        _gazebo_position_joint_controller->Update();
-//    }
-//    else if(_current_control_mode == ControlModes::JointTorqueCtrl){
-//        for(unsigned int i = 0; i < _joint_names.size(); ++i)
-//            _model->GetJoint(_joint_names[i])->SetForce(0, torque_controller->joint_cmd.torques(i));
-//    }
-//    else if(_current_control_mode == ControlModes::JointImpedanceCtrl){
-//        for(unsigned int i = 0; i < _joint_names.size(); ++i){
-//            double q = full_feedback->joint_feedback.angles[i];
-//            double qd = position_controller->joint_cmd.angles[i];
-//            double Kd = impedance_controller->joint_cmd.stiffness[i];
-//            double qdot = full_feedback->joint_feedback.velocities[i];
-//            double Dd = impedance_controller->joint_cmd.damping[i];
-//            double tauoff = torque_controller->joint_cmd.torques[i];
-//            double tau = -Kd*(q-qd)-Dd*qdot+tauoff;
-//            _model->GetJoint(_joint_names[i])->SetForce(0, tau);
-//        }
-//    }
+            }
+        }
 }
+
+//void KinematicChain::move()
+//{
+//    std::vector<int> _tx_position_desired_mRAD(_number_of_dofs);
+//    if(_current_control_mode == ControlModes::JointPositionCtrl){
+//        for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
+//            _tx_position_desired_mRAD[i] =
+//                    (int)(RAD2mRAD(position_controller->joint_cmd.angles[i]-
+//                             _boardsID->offsets[_boardsID->boards_id[i]]));
+//            RTT::log(RTT::Info)<<"position_controller->joint_cmd.angles "<<i<<" "<<position_controller->joint_cmd.angles[i]<<RTT::endlog();
+
+//            RTT::log(RTT::Info)<<"_tx_position_desired_mRAD "<<i<<" "<<_tx_position_desired_mRAD[i]<<RTT::endlog();
+
+//            _boards->set_position_group(
+//                std::vector<uint8_t>(_boardsID->boards_id.begin(),_boardsID->boards_id.end()).data(),
+//                        _tx_position_desired_mRAD.data(), _boardsID->boards_id.size());
+//        }
+//        RTT::log(RTT::Info)<<RTT::endlog();
+//    }
+
+
+////    if(_current_control_mode == ControlModes::JointPositionCtrl){
+////        std::vector<std::string> joint_scoped_names = getJointScopedNames();
+////        for(unsigned int i = 0; i < joint_scoped_names.size(); ++i)
+////            _gazebo_position_joint_controller->SetPositionTarget(joint_scoped_names[i], position_controller->joint_cmd.angles(i));
+////        _gazebo_position_joint_controller->Update();
+////    }
+////    else if(_current_control_mode == ControlModes::JointTorqueCtrl){
+////        for(unsigned int i = 0; i < _joint_names.size(); ++i)
+////            _model->GetJoint(_joint_names[i])->SetForce(0, torque_controller->joint_cmd.torques(i));
+////    }
+////    else if(_current_control_mode == ControlModes::JointImpedanceCtrl){
+////        for(unsigned int i = 0; i < _joint_names.size(); ++i){
+////            double q = full_feedback->joint_feedback.angles[i];
+////            double qd = position_controller->joint_cmd.angles[i];
+////            double Kd = impedance_controller->joint_cmd.stiffness[i];
+////            double qdot = full_feedback->joint_feedback.velocities[i];
+////            double Dd = impedance_controller->joint_cmd.damping[i];
+////            double tauoff = torque_controller->joint_cmd.torques[i];
+////            double tau = -Kd*(q-qd)-Dd*qdot+tauoff;
+////            _model->GetJoint(_joint_names[i])->SetForce(0, tau);
+////        }
+////    }
+//}
 
 std::string KinematicChain::printKinematicChainInformation()
 {

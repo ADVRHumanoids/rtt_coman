@@ -18,7 +18,7 @@ loadComponent("coman","cogimon::rtt_coman")
 
 setActivity("coman",0.001,10,ORO_SCHED_OTHER)
 
-var string YAML_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/COMAN_shared/examples/walking/config.yaml"
+var string YAML_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/rtt_coman/config/config.yaml"
 coman.loadYAML(YAML_path)
 
 var string urdf_path = os.getenv("ROBOTOLOGY_ROOT") + "/robots/cogimon-gazebo-models/iit-coman-no-forearms/model.urdf"
