@@ -60,4 +60,4 @@ coman.setOffSet("RShLat", -90.0*M_PI/180.0)
 coman.start()
 ```
 
-
+To stop the component just call the operation ```.stop()```, this will stop the motor control in the control boards.
