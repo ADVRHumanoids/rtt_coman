@@ -61,3 +61,25 @@ coman.start()
 ```
 
 To stop the component just call the operation ```.stop()```, this will stop the motor control in the control boards.
+
+Available Operations:
+---------------------
+- ***getAvailableControlMode("chain_name")*** return a vector of strings with the available control modes for that kinematic chain  
+- ***getControlMode("chain_name")*** return a string with the actual running control mode for that kinematic chain
+- ***getKinematicChains()*** return a vector of strings with the name of the kinematic chain for the robot
+- ***getKinematicChainsAndJoints()*** return a map between kinematic chain names and joint names (oredered)
+- ***loadYAML("yaml_path")*** load a ```config.yaml``` file
+- ***loadURDFAndSRDF("urdf_path, srdf_path")*** load ```robot.urdf``` and ```robot.srdf``` files
+- ***printKinematicChainInformation("kinematic_chains")*** prints to terminal some information related to kinematic chain
+
+Input Ports:
+------------
+The following set of ports is generated for each kinematic chain of the robot
+- ***kinematic_chain_JointImpedanceCtrl*** set joints stiffness and damping for the impedance control
+- ***kinematic_chain_JointPositionCtrl*** set joints position for position control and impedance control
+- ***kinematic_chain_JointTorqueCtrl*** set joints torque for torque control
+
+Output Ports:
+------------
+The following port is generated for each kinematic chain of the robot
+- ***kinematic_chain_JointFeedback*** joints position, velcity and torque feedback 
