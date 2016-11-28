@@ -53,13 +53,13 @@ public:
     boardsID(const unsigned int i, const std::string& kinematic_chain_name):
         kin_chain_name(kinematic_chain_name)
     {
-        if(0){ //NO_FOREARMS
+        if(i == 0){ //NO_FOREARMS
             r_arm = std::vector<int>{ 16, 17, 18 ,19};
             l_arm = std::vector<int>{ 20, 21, 22, 23};
         }
-        else if(1){ //FOREARMS
-            r_arm = std::vector<int>{ 16, 17, 18 ,19};
-            l_arm = std::vector<int>{ 20, 21, 22, 23};
+        else if(i == 1){ //FOREARMS
+            r_arm = std::vector<int>{ 16, 17, 18 ,19, 26, 27, 28};
+            l_arm = std::vector<int>{ 20, 21, 22, 23, 29, 30, 31};
 
         }
         r_leg = std::vector<int>{  4,  6,  7,  8,  10, 9};
