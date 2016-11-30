@@ -141,7 +141,12 @@ bool rtt_coman::configureHook() {
         RTT::log(RTT::Info) << "Model has " << xbotcoremodel_number_of_joints << " joints" << RTT::endlog();
         RTT::log(RTT::Info) << "Robot has " << _boards->getMCSNum()<< " boards" << RTT::endlog();
 
-        if(_boards->getMCSNum() != xbotcoremodel_number_of_joints){
+        if((_boards->getMCSNum() > xbotcoremodel_number_of_joints &&
+           (_boards->getMCSNum()-xbotcoremodel_number_of_joints) > 2)){
+            RTT::log(RTT::Error)<<"Joints Model and Robots Boards are different!"<<RTT::endlog();
+            return is_configured;
+        }
+        else if(_boards->getMCSNum() < xbotcoremodel_number_of_joints){
             RTT::log(RTT::Error)<<"Joints Model and Robots Boards are different!"<<RTT::endlog();
             return is_configured;
         }
@@ -157,6 +162,8 @@ bool rtt_coman::configureHook() {
                 chain_name, boost::shared_ptr<KinematicChain>(
                     new KinematicChain(chain_name, enabled_joints_in_chain, *(this->ports()), _ts_bc_data,
                                         _boards))));
+
+            RTT::log(RTT::Info)<<kinematic_chains[chain_name]->printKinematicChainInformation()<<RTT::endlog();
         }
         RTT::log(RTT::Info) << "Kinematic Chains map created!" << RTT::endlog();
 

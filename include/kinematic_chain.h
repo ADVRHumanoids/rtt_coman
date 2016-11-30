@@ -119,7 +119,6 @@ public:
     void getCommand();
     void move(int *_tx_position_desired_mRAD);
     std::string printKinematicChainInformation();
-    std::vector<RTT::base::PortInterface*> getAssociatedPorts();
     std::vector<int> getBoardsID();
 
     boost::shared_ptr<position_ctrl> position_controller;
@@ -139,8 +138,6 @@ private:
     std::vector<std::string> _controllers_name;
     unsigned int _number_of_dofs;
     RTT::DataFlowInterface& _ports;
-
-    std::vector<RTT::base::PortInterface*> _inner_ports;
 
     std::string _current_control_mode;
     std::vector<std::string> _joint_names;

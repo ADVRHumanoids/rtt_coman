@@ -1,8 +1,7 @@
 #
-
 board_ctrl:
   eth_iface: eth0
-  boards_num: 27 # 23 mcs + 2 fts
+  boards_num: 35 #27 # 23 mcs + 2 fts
 
 # assume boards of same type have the same policy bc_rate !!! 
 
