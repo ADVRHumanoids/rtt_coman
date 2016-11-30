@@ -141,16 +141,6 @@ bool rtt_coman::configureHook() {
         RTT::log(RTT::Info) << "Model has " << xbotcoremodel_number_of_joints << " joints" << RTT::endlog();
         RTT::log(RTT::Info) << "Robot has " << _boards->getMCSNum()<< " boards" << RTT::endlog();
 
-        if((_boards->getMCSNum() > xbotcoremodel_number_of_joints &&
-           (_boards->getMCSNum()-xbotcoremodel_number_of_joints) > 2)){
-            RTT::log(RTT::Error)<<"Joints Model and Robots Boards are different!"<<RTT::endlog();
-            return is_configured;
-        }
-        else if(_boards->getMCSNum() < xbotcoremodel_number_of_joints){
-            RTT::log(RTT::Error)<<"Joints Model and Robots Boards are different!"<<RTT::endlog();
-            return is_configured;
-        }
-
         _boards->get_bc_data(_ts_bc_data); //IMPORTANT: this has to be done before the kinematic chains creation!
 
         for(unsigned int i = 0; i < _xbotcore_model.get_chain_names().size(); ++i){
@@ -284,8 +274,10 @@ bool rtt_coman::startHook()
         it->second->setControlMode(ControlModes::JointPositionCtrl);
         it->second->move(_tx_position_desired_mRAD);
 
-        for(unsigned int i = 0; i < boards_id.size(); ++i)
+        for(unsigned int i = 0; i < boards_id.size(); ++i){
             success += _boards->start_stop_single_control(boards_id[i], true); //for now only position control
+            RTT::log(RTT::Info)<<"Started board "<<boards_id[i]<<RTT::endlog();
+            usleep(1e4);}
     }
 
     if(success == 0){
