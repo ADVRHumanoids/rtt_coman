@@ -56,11 +56,14 @@ public:
         if(i == 0){ //NO_FOREARMS
             r_arm = std::vector<int>{ 16, 17, 18 ,19};
             l_arm = std::vector<int>{ 20, 21, 22, 23};
+            r_hand = std::vector<int>{ };
+            l_hand = std::vector<int>{ };
         }
         else if(i == 1){ //FOREARMS
             r_arm = std::vector<int>{ 16, 17, 18 ,19, 26, 27, 28};
             l_arm = std::vector<int>{ 20, 21, 22, 23, 29, 30, 31};
-
+            r_hand = std::vector<int>{ 32};
+            l_hand = std::vector<int>{ 33};
         }
         r_leg = std::vector<int>{  4,  6,  7,  8,  10, 9};
         l_leg = std::vector<int>{  5, 11, 12, 13, 15, 14};
@@ -81,6 +84,10 @@ public:
             boards_id = r_arm;
         if(kin_chain_name.compare("torso") == 0)
             boards_id = waist;
+        if(kin_chain_name.compare("left_hand") == 0)
+            boards_id = l_hand;
+        if(kin_chain_name.compare("right_hand") == 0)
+            boards_id = r_hand;
 
     }
 
@@ -94,6 +101,8 @@ private:
     std::vector<int> r_arm;
     std::vector<int> l_arm;
     std::vector<int> neck;
+    std::vector<int> l_hand;
+    std::vector<int> r_hand;
 
 
     std::string kin_chain_name;
