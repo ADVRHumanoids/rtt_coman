@@ -87,7 +87,6 @@ include_directories(
                   ${TINYXML_INCLUDE_DIRS}
                   ${srdfdom_advr_INCLUDE_DIRS}
                   ${XBotCoreModel_INCLUDE_DIRS}
-                  "$ENV{ROBOTOLOGY_ROOT}/robots/COMAN_shared/include"
 )
 
 file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
@@ -107,7 +106,7 @@ target_link_libraries(${PROJECT_NAME}
    ${TINYXML_LIBRARIES}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
-   "$ENV{ROBOTOLOGY_ROOT}/robots/COMAN_shared/lib/librobolli.so"
+   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
 )
 
 orocos_component(motor_controller_test
