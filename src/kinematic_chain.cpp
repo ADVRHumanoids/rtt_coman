@@ -155,6 +155,13 @@ bool KinematicChain::setController(const std::string& controller_type)
         position_controller->joint_cmd = JointAngles(_number_of_dofs);
         position_controller->joint_cmd.angles.setZero();
 
+        voltage_offset.reset(new position_ctrl);
+        voltage_offset->orocos_port.setName(_kinematic_chain_name+"_"+ControlModes::JointPositionCtrl+"_VoltageOffset");
+        voltage_offset->orocos_port.doc("Input for voltageOffest-cmds from Orocos to Robolli.");
+        _ports.addPort(voltage_offset->orocos_port);
+
+        voltage_offset->joint_cmd = JointAngles(_number_of_dofs);
+        voltage_offset->joint_cmd.angles.setZero();
         //ROBOLLI????
     }
     else if(controller_type == ControlModes::JointImpedanceCtrl){
@@ -256,9 +263,12 @@ void KinematicChain::getCommand()
     if(_current_control_mode == ControlModes::JointTorqueCtrl)
         torque_controller->joint_cmd_fs = torque_controller->orocos_port.readNewest(
                     torque_controller->joint_cmd);
-    else if(_current_control_mode == ControlModes::JointPositionCtrl)
+    else if(_current_control_mode == ControlModes::JointPositionCtrl){
         position_controller->joint_cmd_fs = position_controller->orocos_port.readNewest(
                     position_controller->joint_cmd);
+        voltage_offset->joint_cmd_fs = voltage_offset->orocos_port.readNewest(
+                    voltage_offset->joint_cmd);
+    }
     else if(_current_control_mode == ControlModes::JointImpedanceCtrl){
         position_controller->joint_cmd_fs = position_controller->orocos_port.readNewest(
                     position_controller->joint_cmd);
@@ -269,13 +279,15 @@ void KinematicChain::getCommand()
     }
 }
 
-void KinematicChain::move(int* _tx_position_desired_mRAD)
+void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_desired_mV)
 {
         if(_current_control_mode == ControlModes::JointPositionCtrl){
             for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
                 _tx_position_desired_mRAD[_boardsID->boards_id[i]-1] =
                         (int)(RAD2mRAD(position_controller->joint_cmd.angles[i]-
                                  _boardsID->offsets[_boardsID->boards_id[i]]));
+                _tx_voltage_desired_mV[_boardsID->boards_id[i]-1] =
+                            (short)(V2mV(voltage_offset->joint_cmd.angles[i]));
 
             }
         }

@@ -126,11 +126,12 @@ public:
     bool setControlMode(const std::string& controlMode);
     void sense();
     void getCommand();
-    void move(int *_tx_position_desired_mRAD);
+    void move(int *_tx_position_desired_mRAD, short* _tx_voltage_desired_mV);
     std::string printKinematicChainInformation();
     std::vector<int> getBoardsID();
 
     boost::shared_ptr<position_ctrl> position_controller;
+    boost::shared_ptr<position_ctrl> voltage_offset;
     boost::shared_ptr<impedance_ctrl> impedance_controller;
     boost::shared_ptr<torque_ctrl> torque_controller;
 
