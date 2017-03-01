@@ -36,7 +36,13 @@ motor_controller_test::motor_controller_test(const std::string &name):
     this->addOperation("stopTrj", &motor_controller_test::stopTrj,
                 this, RTT::ClientThread);
 
-    _urdf_model.reset(new urdf::Model());
+    this->addOperation("startVoltageFF", &motor_controller_test::startVoltageOffsetTrj,
+                this, RTT::ClientThread);
+    this->addOperation("stopVoltageFF", &motor_controller_test::stopVoltageOffsetTrj,
+                this, RTT::ClientThread);
+
+
+    _urdf_model.reset(new urdf::ModelInterface());
 }
 
 bool motor_controller_test::loadURDFAndSRDF(const std::string &URDF_path, const std::string &SRDF_path)
@@ -47,7 +53,9 @@ bool motor_controller_test::loadURDFAndSRDF(const std::string &URDF_path, const 
     RTT::log(RTT::Info)<<"URDF path: "<<_urdf_path<<RTT::endlog();
     RTT::log(RTT::Info)<<"SRDF path: "<<_srdf_path<<RTT::endlog();
 
-    bool models_loaded = _urdf_model->initFile(_urdf_path);
+    XBot::XBotCoreModel xbot_model;
+    bool models_loaded = xbot_model.init(_urdf_path, _srdf_path);
+    _urdf_model = xbot_model.get_urdf_model();
 
     if(models_loaded)
     {
@@ -118,6 +126,19 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
         _kinematic_chains_output_ports.at(kin_chain_name)->connectTo(
                     task_ptr->ports()->getPort(kin_chain_name+"_"+"JointPositionCtrl"));
 
+
+        _kinematic_chains_output_voltage_ports[kin_chain_name] =
+                boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> >(
+                            new RTT::OutputPort<rstrt::kinematics::JointAngles>(
+                                kin_chain_name+"_"+"JointPositionCtrl_VoltageOffset"));
+        this->addPort(*(_kinematic_chains_output_voltage_ports.at(kin_chain_name))).
+                doc(kin_chain_name+"_"+"JointPositionCtrl VoltageOffset port");
+        _kinematic_chains_output_voltage_ports.at(kin_chain_name)->connectTo(
+                    task_ptr->ports()->getPort(kin_chain_name+"_"+"JointPositionCtrl_VoltageOffset"));
+
+
+
+
         rstrt::kinematics::JointAngles tmp2(joint_names.size());
         _kinematic_chains_desired_joint_state_map[kin_chain_name] = tmp2;
         RTT::log(RTT::Info)<<"Added "<<kin_chain_name<<" port and data input"<<RTT::endlog();
@@ -125,6 +146,9 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
         _map_chain_trj_time[kin_chain_name] = 0.0;
         _map_chain_start_trj[kin_chain_name] = false;
         _map_chain_q0[kin_chain_name] = rstrt::robot::JointState(joint_names.size());
+
+
+        _map_chain_start_voltage_trj[kin_chain_name] = false;
     }
 
     return true;
@@ -173,6 +197,15 @@ void motor_controller_test::updateHook()
             _kinematic_chains_output_ports.at(it->first)->write(_kinematic_chains_desired_joint_state_map.at(it->first));
         }
     }
+
+    for(it = _map_chain_start_voltage_trj.begin(); it != _map_chain_start_voltage_trj.end(); it++)
+    {
+        if(it->second)
+        {
+            _kinematic_chains_desired_joint_state_map.at(it->first).angles[2] = -2;
+            _kinematic_chains_output_voltage_ports.at(it->first)->write(_kinematic_chains_desired_joint_state_map.at(it->first));
+        }
+    }
 }
 
 void motor_controller_test::stopHook()
@@ -216,7 +249,7 @@ bool motor_controller_test::startTrj(const std::string &chain_name)
     _map_chain_q0[chain_name] = _kinematic_chains_joint_state_map.at(chain_name);
     _map_chain_trj_time.at(chain_name) = 0.0;
     _map_chain_start_trj.at(chain_name) = true;
-
+    _map_chain_start_voltage_trj.at(chain_name) = false;
 
     return true;
 }
@@ -227,6 +260,50 @@ bool motor_controller_test::stopTrj(const std::string &chain_name)
         return false;
 
     _map_chain_start_trj.at(chain_name) = false;
+    return true;
+}
+
+bool motor_controller_test::startVoltageOffsetTrj(const std::string& chain_name)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+
+    RTT::TaskContext* task_ptr = this->getPeer(_robot_name);
+    if(!task_ptr){
+        RTT::log(RTT::Error)<<"Can not getPeer("<<_robot_name<<")"<<RTT::endlog();
+        return false;}
+
+    RTT::log(RTT::Info)<<"Found Peer "<<_robot_name<<RTT::endlog();
+
+    RTT::OperationCaller<bool(const std::string&, const std::vector<int>&,
+                              const std::vector<int>&, const std::vector<int>&) > setPID
+        = task_ptr->getOperation("setPID");
+
+    std::vector<int> P, I, D;
+    for(unsigned int i = 0; i < _map_kin_chains_joints.at(chain_name).size(); ++i){
+        P.push_back(0);
+        I.push_back(0);
+        D.push_back(0);}
+
+    bool a = setPID(chain_name, P, I, D);
+
+    _map_chain_start_voltage_trj.at(chain_name) = true;
+    _map_chain_start_trj.at(chain_name) = false;
+
+    return a;
+}
+
+bool motor_controller_test::stopVoltageOffsetTrj(const std::string& chain_name)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+
+    _map_chain_start_voltage_trj.at(chain_name) = false;
+
+    _kinematic_chains_desired_joint_state_map.at(chain_name).angles[2] = 0.;
+    _kinematic_chains_output_voltage_ports.at(chain_name)->write(_kinematic_chains_desired_joint_state_map.at(chain_name));
+
+    return true;
 }
 
 ORO_CREATE_COMPONENT_LIBRARY()ORO_LIST_COMPONENT_TYPE(motor_controller_test)
