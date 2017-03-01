@@ -193,7 +193,7 @@ private:
 
     double getVelocity(const int ID)
     {
-        return mRAD2RAD(_boards_data[ID-1].raw_bc_data.mc_bc_data.Velocity);
+        return (_boards_data[ID-1].raw_bc_data.mc_bc_data.Velocity)/1e3;
     }
 
     double getVelocity(const std::string& joint_name)
