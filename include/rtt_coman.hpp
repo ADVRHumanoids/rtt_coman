@@ -71,6 +71,8 @@ protected:
     bool loadURDFAndSRDF(const std::string& URDF_path, const std::string& SRDF_path);
     std::map<std::string, std::vector<std::string> > getKinematiChainsAndJoints();
     void setOffSet(const std::string& joint_name, const double offset);
+    bool setPID(const std::string& kinematic_chain, const std::vector<int>& P,
+                const std::vector<int>& I, const std::vector<int>& D);
 
 
 

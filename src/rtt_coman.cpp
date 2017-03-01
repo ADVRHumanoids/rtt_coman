@@ -60,6 +60,9 @@ rtt_coman::rtt_coman(const std::string &name):
 
     this->addOperation("setOffSet", &rtt_coman::setOffSet,
                 this, RTT::ClientThread);
+
+    this->addOperation("setPID", &rtt_coman::setPID,
+                this, RTT::ClientThread);
 }
 
 void rtt_coman::setOffSet(const std::string& joint_name, const double offset)
@@ -305,6 +308,21 @@ bool rtt_coman::setControlMode(const std::string& kinematic_chain, const std::st
         is_controlled = false;
 
     return is_controlled;
+}
+
+bool rtt_coman::setPID(const std::string &kinematic_chain, const std::vector<int> &P,
+                       const std::vector<int> &I, const std::vector<int> &D)
+{
+    std::vector<std::string> chain_names = getKinematiChains();
+    if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
+        log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
+        return false;}
+
+    std::vector<std::string> joint_names = kinematic_chains[kinematic_chain]->getJointNames();
+    bool a = true;
+    for(unsigned int i = 0; i < joint_names.size(); ++i)
+        a = a && kinematic_chains[kinematic_chain]->setPID(joint_names[i], P[i], I[i], D[i]);
+    return a;
 }
 
 void rtt_coman::stopHook()

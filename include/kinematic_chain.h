@@ -142,6 +142,12 @@ public:
         setOffSet(_boardsID->boards_id[pos], offset);
     }
 
+    bool setPID(const std::string& joint_name, const int P, const int I, const int D)
+    {
+        int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
+        return setPID(_boardsID->boards_id[pos], P, I, D);
+    }
+
 private:
     std::string _kinematic_chain_name;
     std::vector<std::string> _controllers_name;
@@ -161,6 +167,17 @@ private:
     boost::shared_ptr<boardsID> _boardsID;
     ts_bc_data_t* _boards_data;
     boost::shared_ptr<Boards_ctrl_ext> _boards;
+
+    bool setPID(const int ID, const int P, const int I, const int D)
+    {
+        McBoard* mc_board =  _boards->get_mc_board(ID);
+        if(mc_board != 0)
+        {
+            mc_board->set_PID(POSITION_GAINS, P, I, D);
+            return true;
+        }
+        return false;
+    }
 
     double getPosition(const int ID)
     {
