@@ -36,9 +36,9 @@ motor_controller_test::motor_controller_test(const std::string &name):
     this->addOperation("stopTrj", &motor_controller_test::stopTrj,
                 this, RTT::ClientThread);
 
-    this->addOperation("startVoltageFF", &motor_controller_test::startVoltageOffsetTrj,
+    this->addOperation("startVoltageFF", &motor_controller_test::startVoltageOffset,
                 this, RTT::ClientThread);
-    this->addOperation("stopVoltageFF", &motor_controller_test::stopVoltageOffsetTrj,
+    this->addOperation("stopVoltageFF", &motor_controller_test::stopVoltageOffset,
                 this, RTT::ClientThread);
 
 
@@ -141,7 +141,9 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
 
         rstrt::kinematics::JointAngles tmp2(joint_names.size());
         _kinematic_chains_desired_joint_state_map[kin_chain_name] = tmp2;
+        _kinematic_chains_desired_joint_voltage_offset_map[kin_chain_name] = tmp2;
         RTT::log(RTT::Info)<<"Added "<<kin_chain_name<<" port and data input"<<RTT::endlog();
+
 
         _map_chain_trj_time[kin_chain_name] = 0.0;
         _map_chain_start_trj[kin_chain_name] = false;
@@ -202,8 +204,8 @@ void motor_controller_test::updateHook()
     {
         if(it->second)
         {
-            _kinematic_chains_desired_joint_state_map.at(it->first).angles[2] = -2;
-            _kinematic_chains_output_voltage_ports.at(it->first)->write(_kinematic_chains_desired_joint_state_map.at(it->first));
+            _kinematic_chains_output_voltage_ports.at(it->first)->write(
+                        _kinematic_chains_desired_joint_voltage_offset_map.at(it->first));
         }
     }
 }
@@ -263,7 +265,7 @@ bool motor_controller_test::stopTrj(const std::string &chain_name)
     return true;
 }
 
-bool motor_controller_test::startVoltageOffsetTrj(const std::string& chain_name)
+bool motor_controller_test::startVoltageOffset(const std::string& chain_name, const std::vector<double>& offset)
 {
     if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
         return false;
@@ -287,13 +289,17 @@ bool motor_controller_test::startVoltageOffsetTrj(const std::string& chain_name)
 
     bool a = setPID(chain_name, P, I, D);
 
+    _kinematic_chains_desired_joint_voltage_offset_map.at(chain_name).angles.resize(offset.size());
+    for(unsigned int i = 0; i < offset.size(); ++i)
+        _kinematic_chains_desired_joint_voltage_offset_map.at(chain_name).angles[i] = offset[i];
+
     _map_chain_start_voltage_trj.at(chain_name) = true;
     _map_chain_start_trj.at(chain_name) = false;
 
     return a;
 }
 
-bool motor_controller_test::stopVoltageOffsetTrj(const std::string& chain_name)
+bool motor_controller_test::stopVoltageOffset(const std::string& chain_name)
 {
     if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
         return false;

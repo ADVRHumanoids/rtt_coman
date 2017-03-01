@@ -57,6 +57,7 @@ private:
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_ports;
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_voltage_ports;
     std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_state_map;
+    std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_voltage_offset_map;
 
     std::map<std::string, std::pair<double, double>> _map_joint_limimts;
 
@@ -65,8 +66,8 @@ private:
     bool startTrj(const std::string& chain_name);
     bool stopTrj(const std::string& chain_name);
 
-    bool startVoltageOffsetTrj(const std::string& chain_name);
-    bool stopVoltageOffsetTrj(const std::string& chain_name);
+    bool startVoltageOffset(const std::string& chain_name, const std::vector<double>& offset);
+    bool stopVoltageOffset(const std::string& chain_name);
 
     double sin_traj(double q0, double amplitude, double t, double period){
         return q0 + amplitude*std::sin(t/(period*M_PI));
