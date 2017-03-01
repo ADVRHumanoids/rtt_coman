@@ -71,15 +71,23 @@ Available Operations:
 - ***loadYAML("yaml_path")*** load a ```config.yaml``` file
 - ***loadURDFAndSRDF("urdf_path, srdf_path")*** load ```robot.urdf``` and ```robot.srdf``` files
 - ***printKinematicChainInformation("kinematic_chains")*** prints to terminal some information related to kinematic chain
+- ***setPID("kinematic_chains", P, I, D)*** set PID values for position Ctrl for a particular kinematic chain
 
 Input Ports:
 ------------
 The following set of ports is generated for each kinematic chain of the robot
 - ***kinematic_chain_JointImpedanceCtrl*** set joints stiffness and damping for the impedance control
 - ***kinematic_chain_JointPositionCtrl*** set joints position for position control and impedance control
+- ***kinematic_chain_JointPositionCtrl_VoltageOffset*** set joints voltage offset for position control
 - ***kinematic_chain_JointTorqueCtrl*** set joints torque for torque control
 
 Output Ports:
 ------------
 The following port is generated for each kinematic chain of the robot
-- ***kinematic_chain_JointFeedback*** joints position, velcity and torque feedback 
+- ***kinematic_chain_JointFeedback*** joints position, velcity and torque feedback
+
+NOTE:
+-----
+Available controllers are (for now):
+- ***Position Ctrl***
+- ***Voltage Ctrl*** obtained setting the Position Ctrol mode, setting to 0 all the PIDs and sending values in the ```kinematic_chain_JointPositionCtrl_VoltageOffset``` port
