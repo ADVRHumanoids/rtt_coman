@@ -70,7 +70,9 @@ public:
         waist = std::vector<int>{  3,  2, 1};
         neck  = std::vector<int>{ }; //{ 24, 25};
 
-        int s = r_leg.size() + l_leg.size() + waist.size() + neck.size() + r_arm.size() + l_arm.size();
+        int s = 1 + r_leg.size() + l_leg.size() + waist.size()
+                + neck.size() + r_arm.size() + l_arm.size()
+                + r_hand.size() + l_hand.size();
         for(unsigned int i = 0; i < s; ++i)
             offsets.push_back(0.0);
 
