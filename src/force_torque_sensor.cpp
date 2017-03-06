@@ -16,6 +16,9 @@ force_torque_sensor::force_torque_sensor(const std::string &joint_srdf,
         _ft_ID.reset(new force_torqueID(_force_torque_frame));
         RTT::log(RTT::Info)<<"Board ID: "<<_ft_ID->boards_id[0]<<RTT::endlog();
 
+        for(unsigned int i = 0; i < 6; ++i)
+            _measurement_direction.push_back(1.);
+
         setFeedback();
         _inited = true;
     }
@@ -60,4 +63,18 @@ void force_torque_sensor::sense()
         if (_wrench_measured->orocos_port.connected())
             _wrench_measured->orocos_port.write(_wrench_measured->sensor_feedback);
     }
+}
+
+bool force_torque_sensor::setMeasurementDirection(const std::vector<int>& directions)
+{
+    if(directions.size() != 6){
+        RTT::log(RTT::Error)<<"Vector of direction has to be of size 6!"<<RTT::endlog();
+        return false;
+    }
+
+    for(unsigned int i = 0; i < directions.size(); ++i){
+        if(directions[i] != 0)
+            _measurement_direction[i] = directions[i]/fabs(directions[i]);
+    }
+    return true;
 }

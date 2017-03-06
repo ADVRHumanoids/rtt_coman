@@ -75,6 +75,9 @@ protected:
     void setOffSet(const std::string& joint_name, const double offset);
     bool setPID(const std::string& kinematic_chain, const std::vector<int>& P,
                 const std::vector<int>& I, const std::vector<int>& D);
+    std::vector<std::string> getForceTorqueSensorsFrames();
+    bool setForceTorqueMeasurementDirection(const std::string& force_torque_frame,
+                                            const std::vector<int>& directions);
 
 
 

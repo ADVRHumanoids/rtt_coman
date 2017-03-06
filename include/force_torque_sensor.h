@@ -69,6 +69,8 @@ public:
     bool isInited(){ return _inited;}
     void sense();
     std::string getFrame(){ return _force_torque_frame;}
+
+    bool setMeasurementDirection(const std::vector<int>& directions);
 private:
     /**
      * @brief _force_torque_frame is the frame where the force/torque is measured
@@ -80,6 +82,7 @@ private:
     RTT::DataFlowInterface& _ports;
     bool _inited;
     ts_bc_data_t* _boards_data;
+    std::vector<int> _measurement_direction;
 
     /**
      * @brief pairFrameToSensor check if a sensor is associated to a given frame
@@ -94,16 +97,19 @@ private:
 
     void fillMsg()
     {
-        _wrench_measured->sensor_feedback.forces[0] = (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fx)/1000.;
-        _wrench_measured->sensor_feedback.forces[1] = (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fy)/1000.;
-        _wrench_measured->sensor_feedback.forces[2] = (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fz)/1000.;
-        _wrench_measured->sensor_feedback.torques[0] =(_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.tx)/1000.;
-        _wrench_measured->sensor_feedback.torques[1] = (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.ty)/1000.;
-        _wrench_measured->sensor_feedback.torques[2] = (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.tz)/1000.;
+        _wrench_measured->sensor_feedback.forces[0] = _measurement_direction[0]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fx)/1000.;
+        _wrench_measured->sensor_feedback.forces[1] = _measurement_direction[1]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fy)/1000.;
+        _wrench_measured->sensor_feedback.forces[2] = _measurement_direction[2]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.fz)/1000.;
+        _wrench_measured->sensor_feedback.torques[0] = _measurement_direction[3]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.tx)/1000.;
+        _wrench_measured->sensor_feedback.torques[1] = _measurement_direction[4]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.ty)/1000.;
+        _wrench_measured->sensor_feedback.torques[2] = _measurement_direction[5]*
+                (_boards_data[_ft_ID->boards_id[0]-1].raw_bc_data.ft_bc_data.tz)/1000.;
 
-
-//        std::cout<<"_force_torque_frame: ["<<_wrench_measured->sensor_feedback.forces<<" "<<
-//                   _wrench_measured->sensor_feedback.torques<<"]"<<std::endl;
     }
 
 };

@@ -63,6 +63,33 @@ rtt_coman::rtt_coman(const std::string &name):
 
     this->addOperation("setPID", &rtt_coman::setPID,
                 this, RTT::ClientThread);
+
+    this->addOperation("getForceTorqueSensorsFrames", &rtt_coman::getForceTorqueSensorsFrames,
+                this, RTT::ClientThread);
+
+    this->addOperation("setForceTorqueMeasurementDirection", &rtt_coman::setForceTorqueMeasurementDirection,
+                this, RTT::ClientThread);
+
+}
+
+bool rtt_coman::setForceTorqueMeasurementDirection(const std::string& force_torque_frame,
+                                        const std::vector<int>& directions)
+{
+    if(is_configured && !isRunning())
+    {
+        for(unsigned int i = 0; i < force_torque_sensors.size(); ++i)
+        {
+            if(force_torque_frame.compare(force_torque_sensors[i].getFrame()) == 0)
+                return force_torque_sensors[i].setMeasurementDirection(directions);
+        }
+        RTT::log(RTT::Warning)<<"Force Torque frame "<<force_torque_frame<<" can not be found"<<RTT::endlog();
+    }
+
+    if(!is_configured)
+        RTT::log(RTT::Warning)<<"Component has to be configured before setting FT measurement directions!"<<RTT::endlog();
+    if(isRunning())
+        RTT::log(RTT::Error)<<"Can NOT set FT measurement directions when component is running!"<<RTT::endlog();
+    return false;
 }
 
 void rtt_coman::setOffSet(const std::string& joint_name, const double offset)
@@ -357,6 +384,14 @@ void rtt_coman::stopHook()
         for(unsigned int j = 0; j < boards_id.size(); ++j)
             _boards->start_stop_single_control(boards_id[j]-1, false);
     }
+}
+
+std::vector<std::string> rtt_coman::getForceTorqueSensorsFrames()
+{
+    std::vector<std::string> tmp;
+    for(unsigned int i = 0; i < force_torque_sensors.size(); ++i)
+        tmp.push_back(force_torque_sensors[i].getFrame());
+    return tmp;
 }
 
 ORO_CREATE_COMPONENT_LIBRARY()
