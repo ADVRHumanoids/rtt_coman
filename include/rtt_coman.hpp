@@ -49,6 +49,8 @@
 #include <Boards_ctrl_ext.h>
 #include <utils.h>
 
+#include <force_torque_sensor.h>
+
 namespace cogimon {
 
 class rtt_coman: public RTT::TaskContext {
@@ -78,6 +80,7 @@ protected:
 
 
     std::map<std::string, boost::shared_ptr<KinematicChain>> kinematic_chains;
+    std::vector<force_torque_sensor> force_torque_sensors;
 
     XBot::XBotCoreModel _xbotcore_model;
     bool _models_loaded;

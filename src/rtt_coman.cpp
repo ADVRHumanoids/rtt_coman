@@ -170,6 +170,24 @@ bool rtt_coman::configureHook() {
         }
         RTT::log(RTT::Info) << "Kinematic Chains Initialized!" << RTT::endlog();
 
+
+        RTT::log(RTT::Info) << "Checking Sensors"<<RTT::endlog();
+
+        std::map<std::string,int> ft_srdf = _xbotcore_model.get_ft_sensors();
+        RTT::log(RTT::Info) << "Model has " << ft_srdf.size() << " Force/Torque Sensors" << RTT::endlog();
+        RTT::log(RTT::Info) << "Robot has " << _boards->getFTSNum()<< " Force/Torque Sensors" << RTT::endlog();
+
+        for(std::map<std::string,int>::iterator i = ft_srdf.begin();
+            i != ft_srdf.end(); i++)
+        {
+            force_torque_sensor ft(i->first, *(this->ports()), _xbotcore_model.get_urdf_model(),
+                                   _ts_bc_data);
+            force_torque_sensors.push_back(ft);
+        }
+
+
+
+
         RTT::log(RTT::Warning) << "Done configuring component" << RTT::endlog();
     }
 
@@ -196,6 +214,9 @@ void rtt_coman::updateHook(){
     _boards->get_bc_data(_ts_bc_data);
     for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++)
         it->second->sense();
+
+    for(unsigned int i = 0; i < force_torque_sensors.size(); ++i)
+        force_torque_sensors[i].sense();
 
     // MOVE:
     if(is_controlled)

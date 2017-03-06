@@ -93,7 +93,7 @@ file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE motor_controller_test_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/test" *.h)
 
 orocos_component(${PROJECT_NAME} 
-src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp
+src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp src/force_torque_sensor.cpp
 ${rtt_coman_INCLUDES})
 set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
 
