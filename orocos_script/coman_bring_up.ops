@@ -25,4 +25,7 @@ var double M_PI = 3.14159265359;
 coman.setOffSet("LShLat", 90.0*M_PI/180.0)
 coman.setOffSet("RShLat", -90.0*M_PI/180.0)
 
+var ints direction = ints(-1, -1, 1, -1, 1 ,1)
+coman.setForceTorqueMeasurementDirection("r_arm_ft", direction)
+
 coman.start()
