@@ -72,6 +72,9 @@ Available Operations:
 - ***loadURDFAndSRDF("urdf_path, srdf_path")*** load ```robot.urdf``` and ```robot.srdf``` files
 - ***printKinematicChainInformation("kinematic_chains")*** prints to terminal some information related to kinematic chain
 - ***setPID("kinematic_chains", P, I, D)*** set PID values for position Ctrl for a particular kinematic chain
+- ***setOffSet("joint_name", rad)*** set position offset to a certain joint
+- ***getForceTorqueSensorsFrames()*** get force/torque sensors frames
+- ***setForceTorqueMeasurementDirection("force_torque_sensor", vector_of_signs)*** set force/torque sensors measurements signs
 
 Input Ports:
 ------------
@@ -85,6 +88,7 @@ Output Ports:
 ------------
 The following port is generated for each kinematic chain of the robot
 - ***kinematic_chain_JointFeedback*** joints position, velcity and torque feedback
+- ***name_ft_SensorFeedback*** force/torque sensor feedback
 
 NOTE:
 -----
