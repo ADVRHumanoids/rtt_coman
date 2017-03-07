@@ -151,6 +151,12 @@ public:
         return setPID(_boardsID->boards_id[pos], P, I, D);
     }
 
+    bool setImpedanceCtrl(const std::string& joint_name)
+    {
+        int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
+        return setImpedanceCtrl(_boardsID->boards_id[pos], false);
+    }
+
 private:
     std::string _kinematic_chain_name;
     std::vector<std::string> _controllers_name;
@@ -177,6 +183,17 @@ private:
         if(mc_board != 0)
         {
             mc_board->set_PID(POSITION_GAINS, P, I, D);
+            return true;
+        }
+        return false;
+    }
+
+    bool setPIDTorque(const int ID, const int P, const int I, const int D)
+    {
+        McBoard* mc_board =  _boards->get_mc_board(ID);
+        if(mc_board != 0)
+        {
+            mc_board->set_PID(TORQUE_GAINS, P, I, D);
             return true;
         }
         return false;
@@ -219,6 +236,8 @@ private:
     {
         _boardsID->offsets[ID] = offset;
     }
+
+    bool setImpedanceCtrl(const int ID, const bool pure_torque = false);
 
 
 

@@ -233,10 +233,22 @@ bool KinematicChain::setControlMode(const std::string &controlMode)
     }
 
     if(controlMode == ControlModes::JointPositionCtrl){
-
+            for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
+                _boards->start_stop_single_control(
+                            _boardsID->boards_id[i], false);
+                _boards->start_stop_single_control(
+                            _boardsID->boards_id[i], true);
+            }
             setInitialPosition();
     }
-    else if(controlMode == ControlModes::JointTorqueCtrl || controlMode == ControlModes::JointImpedanceCtrl){
+    else if(controlMode == ControlModes::JointImpedanceCtrl){
+        for(unsigned int i = 0; i < _joint_names.size(); ++i){
+            if(!setImpedanceCtrl(_joint_names[i])){
+                RTT::log(RTT::Error)<<"Can not set Impedance Ctrl to joint "<<_joint_names[i]<<RTT::endlog();
+                return false;}
+        }
+    }
+    else if(controlMode == ControlModes::JointTorqueCtrl){
 
     }
 
@@ -363,4 +375,63 @@ std::string KinematicChain::printKinematicChainInformation()
 
 
     return info.str();
+}
+
+bool KinematicChain::setImpedanceCtrl(const int ID, const bool pure_torque)
+{
+    //Steps:
+    //1) Set PID Gains to 0 and Torque Gains to 0
+    if(setPID(ID, 0, 0, 0) && setPIDTorque(ID, 0, 0, 0))
+    {
+        McBoard* mc_board =  _boards->get_mc_board(ID);
+        _boards->start_stop_single_control(ID, false);
+
+        //4)Set bites 10 to 1 in configuration2 mask
+        int tries = 0;
+        while(mc_board->getItem(GET_MOTOR_CONFIG2, NULL, 0, REPLY_MOTOR_CONFIG2,
+                          &(mc_board->_motor_config2),
+                          sizeof(mc_board->_motor_config2)) != 0)
+        {
+            tries++;
+            if(tries == 10)
+                return false;
+        }
+        short int param = mc_board->_motor_config2;
+        param |= 0x0400;
+        if(mc_board->setItem(SET_MOTOR_CONFIG2, &param, sizeof(param)))
+            return false;
+
+
+        //3)Set bites 14, 11 and 1 to 1 in configuration mask
+        tries = 0;
+        while(mc_board->getItem(GET_MOTOR_CONFIG, NULL, 0, REPLY_MOTOR_CONFIG,
+                          &(mc_board->_motor_config),
+                          sizeof(mc_board->_motor_config)) != 0)
+        {
+            tries++;
+            if(tries == 10)
+                return false;
+        }
+        param = mc_board->_motor_config;
+        param |= 0x4802;
+        if(mc_board->setItem(SET_MOTOR_CONFIG, &param, sizeof(param)))
+            return false;
+
+        //2)Set Torque ON/OFF flag to 1
+        mc_board->_torque_on_off = 1;
+        mc_board->setItem(SET_TORQUE_ON_OFF, &(mc_board->_torque_on_off),
+                          mc_board->_torque_on_off);
+
+        //5)Set PID gains to (5000, 0, 500) and Torque gains to (445, 22, 0)
+        if(!pure_torque){
+            if(setPID(ID, 5000, 0, 500) && setPIDTorque(ID, 445, 22, 0)){
+                _boards->start_stop_single_control(ID, true);
+                return true;}
+        }
+        else{
+            if(setPIDTorque(ID, 445, 22, 0))
+                return true;
+        }
+    }
+    return false;
 }

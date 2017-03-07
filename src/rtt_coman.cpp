@@ -34,8 +34,8 @@ rtt_coman::rtt_coman(const std::string &name):
     _yaml_is_loaded(false),
     is_controlled(false)
 {
-//    this->addOperation("setControlMode", &rtt_coman::setControlMode,
-//                this, RTT::ClientThread);
+    this->addOperation("setControlMode", &rtt_coman::setControlMode,
+                this, RTT::ClientThread);
 
     this->addOperation("getKinematicChains", &rtt_coman::getKinematiChains,
                 this, RTT::ClientThread);
