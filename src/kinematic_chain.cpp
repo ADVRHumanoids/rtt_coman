@@ -171,8 +171,10 @@ bool KinematicChain::setController(const std::string& controller_type)
         _ports.addPort(impedance_controller->orocos_port);
 
         impedance_controller->joint_cmd = JointImpedance(_number_of_dofs);
-        impedance_controller->joint_cmd.stiffness.setZero();
-        impedance_controller->joint_cmd.damping.setZero();
+        impedance_controller->joint_cmd.stiffness =
+                5.0*impedance_controller->joint_cmd.stiffness.setOnes();
+        impedance_controller->joint_cmd.damping =
+            0.5*impedance_controller->joint_cmd.damping.setOnes();
     }
     else if(controller_type == ControlModes::JointTorqueCtrl)
     {
@@ -233,12 +235,6 @@ bool KinematicChain::setControlMode(const std::string &controlMode)
     }
 
     if(controlMode == ControlModes::JointPositionCtrl){
-            for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
-                _boards->start_stop_single_control(
-                            _boardsID->boards_id[i], false);
-                _boards->start_stop_single_control(
-                            _boardsID->boards_id[i], true);
-            }
             setInitialPosition();
     }
     else if(controlMode == ControlModes::JointImpedanceCtrl){
@@ -377,7 +373,9 @@ std::string KinematicChain::printKinematicChainInformation()
     return info.str();
 }
 
-bool KinematicChain::setImpedanceCtrl(const int ID, const bool pure_torque)
+bool KinematicChain::setImpedanceCtrl(const int ID,
+                                      const double K, const double D,
+                                      const bool pure_torque)
 {
     //Steps:
     //1) Set PID Gains to 0 and Torque Gains to 0
@@ -424,7 +422,7 @@ bool KinematicChain::setImpedanceCtrl(const int ID, const bool pure_torque)
 
         //5)Set PID gains to (5000, 0, 500) and Torque gains to (445, 22, 0)
         if(!pure_torque){
-            if(setPID(ID, 5000, 0, 500) && setPIDTorque(ID, 445, 22, 0)){
+            if(setPID(ID, int(K*1000.), 0, int(D*1000.)) && setPIDTorque(ID, 445, 22, 0)){
                 _boards->start_stop_single_control(ID, true);
                 return true;}
         }

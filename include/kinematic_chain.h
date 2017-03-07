@@ -154,7 +154,9 @@ public:
     bool setImpedanceCtrl(const std::string& joint_name)
     {
         int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
-        return setImpedanceCtrl(_boardsID->boards_id[pos], false);
+        double K = impedance_controller->joint_cmd.stiffness[pos];
+        double D = impedance_controller->joint_cmd.damping[pos];
+        return setImpedanceCtrl(_boardsID->boards_id[pos], K, D,false);
     }
 
 private:
@@ -237,7 +239,8 @@ private:
         _boardsID->offsets[ID] = offset;
     }
 
-    bool setImpedanceCtrl(const int ID, const bool pure_torque = false);
+    bool setImpedanceCtrl(const int ID, const double K,
+                          const double D, const bool pure_torque = false);
 
 
 
