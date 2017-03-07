@@ -79,6 +79,8 @@ protected:
     bool setForceTorqueMeasurementDirection(const std::string& force_torque_frame,
                                             const std::vector<int>& directions);
 
+    bool setImpedance(const std::string& kinematic_chain, const std::vector<int>& P,
+                const std::vector<int>& D);
 
 
 
