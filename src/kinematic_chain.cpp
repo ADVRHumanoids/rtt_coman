@@ -203,18 +203,6 @@ void KinematicChain::setInitialPosition()
     position_controller->joint_cmd_fs = RTT::FlowStatus::NewData;
 }
 
-//Here we use the vaue given by robolli
-void KinematicChain::setInitialImpedance()
-{
-    RTT::log(RTT::Info)<<_kinematic_chain_name<<" impedance:"<<RTT::endlog();
-    for(unsigned int i = 0; i < _joint_names.size(); ++i){
-//        impedance_controller->joint_cmd.stiffness[i] = impedance.stiffness;
-//        impedance_controller->joint_cmd.damping[i] = impedance.damping;
-//        RTT::log(RTT::Info)<<"  "<<impedance.joint_name<<" stiffness: "<<impedance.stiffness<<" damping: "<<impedance.damping<<RTT::endlog();
-    }
-    impedance_controller->joint_cmd_fs = RTT::FlowStatus::NewData;
-}
-
 std::vector<int> KinematicChain::getBoardsID()
 {
     return _boardsID->boards_id;
@@ -245,7 +233,11 @@ bool KinematicChain::setControlMode(const std::string &controlMode)
         }
     }
     else if(controlMode == ControlModes::JointTorqueCtrl){
-
+        for(unsigned int i = 0; i < _joint_names.size(); ++i){
+            if(!setTorqueCtrl(_joint_names[i])){
+                RTT::log(RTT::Error)<<"Can not set Torque Ctrl to joint "<<_joint_names[i]<<RTT::endlog();
+                return false;}
+        }
     }
 
     _current_control_mode = controlMode;
@@ -285,6 +277,9 @@ void KinematicChain::getCommand()
         torque_controller->joint_cmd_fs = torque_controller->orocos_port.readNewest(
                     torque_controller->joint_cmd);
     }
+    else if(_current_control_mode == ControlModes::JointTorqueCtrl)
+        torque_controller->joint_cmd_fs = torque_controller->orocos_port.readNewest(
+                    torque_controller->joint_cmd);
 }
 
 void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_desired_mV,
@@ -308,6 +303,11 @@ void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_des
                 _tx_torque_desired_mNm[_boardsID->boards_id[i]-1] =
                         (int)(1000.0*(torque_controller->joint_cmd.torques[i]));
             }
+        }
+        if(_current_control_mode == ControlModes::JointTorqueCtrl){
+            for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i)
+                _tx_torque_desired_mNm[_boardsID->boards_id[i]-1] =
+                        (int)(1000.0*(torque_controller->joint_cmd.torques[i]));
         }
 }
 
@@ -393,8 +393,9 @@ bool KinematicChain::setImpedanceCtrl(const int ID,
                 return true;}
         }
         else{
-            if(setPIDTorque(ID, 445, 22, 0))
-                return true;
+            if(setPIDTorque(ID, 445, 22, 0)){
+                _boards->start_stop_single_control(ID, true);
+                return true;}
         }
     }
     return false;

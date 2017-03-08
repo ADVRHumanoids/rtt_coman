@@ -273,7 +273,7 @@ void rtt_coman::updateHook(){
         _boards->set_pid_offset(_tx_voltage_desired_mV,
                                 sizeof(int)*MAX_MC_BOARDS);
 
-        //This is used for the toqrue control
+        //This is used for the torque control
         _boards->set_gravity_compensation(_tx_torque_desired_mNm,
                                           sizeof(int)*MAX_MC_BOARDS);
 

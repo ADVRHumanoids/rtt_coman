@@ -160,6 +160,14 @@ public:
         return setImpedanceCtrl(_boardsID->boards_id[pos], K, D,false);
     }
 
+    bool setTorqueCtrl(const std::string& joint_name)
+    {
+        int pos = std::find(_joint_names.begin(), _joint_names.end(), joint_name) - _joint_names.begin();
+        double K = 0.;
+        double D = 0.;
+        return setImpedanceCtrl(_boardsID->boards_id[pos], K, D,true);
+    }
+
 private:
     std::string _kinematic_chain_name;
     std::vector<std::string> _controllers_name;
@@ -173,7 +181,6 @@ private:
     bool setController(const std::string& controller_type);
     void setFeedBack();
     void setInitialPosition();
-    void setInitialImpedance();
 
     boost::shared_ptr<cogimon::gains> _gains;
     boost::shared_ptr<boardsID> _boardsID;
