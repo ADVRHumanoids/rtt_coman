@@ -47,12 +47,15 @@ coman.loadURDFAndSRDF(urdf_path, srdf_path)
 
 coman.configure()
 ```
-- If needed is possible to set joint offsets for the model, this operation has to be done before calling the ```start()```:
+- If needed is possible to set joint offsets and force/torque sensors measurement direction for the model, these operations has to be done before calling the ```start()```:
 
 ```
 var double M_PI = 3.14159265359;
 coman.setOffSet("LShLat", 90.0*M_PI/180.0)
 coman.setOffSet("RShLat", -90.0*M_PI/180.0)
+
+var ints direction = ints(-1, -1, 1, -1, 1 ,1)
+coman.setForceTorqueMeasurementDirection("r_arm_ft", direction)
 ```
 - Finally we start the component:
 
@@ -95,3 +98,6 @@ NOTE:
 Available controllers are (for now):
 - ***Position Ctrl***
 - ***Voltage Ctrl*** obtained setting the Position Ctrol mode, setting to 0 all the PIDs and sending values in the ```kinematic_chain_JointPositionCtrl_VoltageOffset``` port
+- ***Impedance Ctrl*** implemented as: Inline-style: 
+![alt text](https://gitlab.advrcloud.iit.it/advr_humanoids/rtt_coman/blob/master/joint_impedance_ctrl.gif "Logo Title Text 1")
+
