@@ -103,6 +103,7 @@ private:
     ts_bc_data_t   _ts_bc_data[MAX_DSP_BOARDS];
     int _tx_position_desired_mRAD[MAX_DSP_BOARDS];
     short _tx_voltage_desired_mV[MAX_DSP_BOARDS];
+    int _tx_torque_desired_mNm[MAX_DSP_BOARDS];
 };
 
 }

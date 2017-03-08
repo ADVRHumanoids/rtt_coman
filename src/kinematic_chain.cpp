@@ -287,10 +287,10 @@ void KinematicChain::getCommand()
     }
 }
 
-void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_desired_mV)
+void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_desired_mV,
+                          int *_tx_torque_desired_mNm)
 {
-        if(_current_control_mode == ControlModes::JointPositionCtrl ||
-           _current_control_mode == ControlModes::JointImpedanceCtrl){
+        if(_current_control_mode == ControlModes::JointPositionCtrl){
             for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
                 _tx_position_desired_mRAD[_boardsID->boards_id[i]-1] =
                         (int)(RAD2mRAD(position_controller->joint_cmd.angles[i]-
@@ -298,6 +298,15 @@ void KinematicChain::move(int* _tx_position_desired_mRAD, short* _tx_voltage_des
                 _tx_voltage_desired_mV[_boardsID->boards_id[i]-1] =
                             (short)(V2mV(voltage_offset->joint_cmd.angles[i]));
 
+            }
+        }
+        if(_current_control_mode == ControlModes::JointImpedanceCtrl){
+            for(unsigned int i = 0; i < _boardsID->boards_id.size(); ++i){
+                _tx_position_desired_mRAD[_boardsID->boards_id[i]-1] =
+                        (int)(RAD2mRAD(position_controller->joint_cmd.angles[i]-
+                                 _boardsID->offsets[_boardsID->boards_id[i]]));
+                _tx_torque_desired_mNm[_boardsID->boards_id[i]-1] =
+                        (int)(1000.0*(torque_controller->joint_cmd.torques[i]));
             }
         }
 }

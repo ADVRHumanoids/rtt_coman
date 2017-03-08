@@ -22,6 +22,8 @@
 #include <string>
 #include <rst-rt/robot/JointState.hpp>
 #include <rst-rt/kinematics/JointAngles.hpp>
+#include <rst-rt/dynamics/JointTorques.hpp>
+#include <rst-rt/dynamics/JointImpedance.hpp>
 #include <rtt/TaskContext.hpp>
 #include <rtt/Component.hpp>
 #include <rtt/Port.hpp>
@@ -50,14 +52,17 @@ private:
     std::map<std::string, rstrt::robot::JointState> _map_chain_q0;
     std::map<std::string, bool> _map_chain_start_trj;
     std::map<std::string, bool> _map_chain_start_voltage_trj;
+    std::map<std::string, bool> _map_chain_start_torque_trj;
 
     std::map<std::string, boost::shared_ptr<RTT::InputPort<rstrt::robot::JointState> > > _kinematic_chains_feedback_ports;
     std::map<std::string, rstrt::robot::JointState> _kinematic_chains_joint_state_map;
 
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_ports;
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_voltage_ports;
+    std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::dynamics::JointTorques> > > _kinematic_chains_output_torques_ports;
     std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_state_map;
     std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_voltage_offset_map;
+    std::map<std::string, rstrt::dynamics::JointTorques> _kinematic_chains_desired_joint_torque_map;
 
     std::map<std::string, std::pair<double, double>> _map_joint_limimts;
 
@@ -68,6 +73,9 @@ private:
 
     bool startVoltageOffset(const std::string& chain_name, const std::vector<double>& offset);
     bool stopVoltageOffset(const std::string& chain_name);
+
+    bool startTorqueTrj(const std::string& chain_name);
+    bool stopTorqueTrj(const std::string& chain_name);
 
     double sin_traj(double q0, double amplitude, double t, double period){
         return q0 + amplitude*std::sin(t/(period*M_PI));

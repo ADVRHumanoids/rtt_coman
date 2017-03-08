@@ -41,6 +41,11 @@ motor_controller_test::motor_controller_test(const std::string &name):
     this->addOperation("stopVoltageFF", &motor_controller_test::stopVoltageOffset,
                 this, RTT::ClientThread);
 
+    this->addOperation("startTorqueTrj", &motor_controller_test::startTorqueTrj,
+                this, RTT::ClientThread);
+    this->addOperation("stopTorqueTrj", &motor_controller_test::stopTorqueTrj,
+                this, RTT::ClientThread);
+
 
     _urdf_model.reset(new urdf::ModelInterface());
 }
@@ -137,11 +142,23 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
                     task_ptr->ports()->getPort(kin_chain_name+"_"+"JointPositionCtrl_VoltageOffset"));
 
 
+        _kinematic_chains_output_torques_ports[kin_chain_name] =
+                boost::shared_ptr<RTT::OutputPort<rstrt::dynamics::JointTorques> >(
+                            new RTT::OutputPort<rstrt::dynamics::JointTorques>(
+                                kin_chain_name+"_"+"JointTorqueCtrl"));
+        this->addPort(*(_kinematic_chains_output_torques_ports.at(kin_chain_name))).
+                doc(kin_chain_name+"_"+"JointTorqueCtrl port");
+        _kinematic_chains_output_torques_ports.at(kin_chain_name)->connectTo(
+                    task_ptr->ports()->getPort(kin_chain_name+"_"+"JointTorqueCtrl"));
+
+
 
 
         rstrt::kinematics::JointAngles tmp2(joint_names.size());
         _kinematic_chains_desired_joint_state_map[kin_chain_name] = tmp2;
         _kinematic_chains_desired_joint_voltage_offset_map[kin_chain_name] = tmp2;
+        rstrt::dynamics::JointTorques tmp3(joint_names.size());
+        _kinematic_chains_desired_joint_torque_map[kin_chain_name] = tmp3;
         RTT::log(RTT::Info)<<"Added "<<kin_chain_name<<" port and data input"<<RTT::endlog();
 
 
@@ -151,6 +168,8 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
 
 
         _map_chain_start_voltage_trj[kin_chain_name] = false;
+
+        _map_chain_start_torque_trj[kin_chain_name] = false;
     }
 
     return true;
@@ -206,6 +225,26 @@ void motor_controller_test::updateHook()
         {
             _kinematic_chains_output_voltage_ports.at(it->first)->write(
                         _kinematic_chains_desired_joint_voltage_offset_map.at(it->first));
+        }
+    }
+
+    for(it = _map_chain_start_torque_trj.begin(); it != _map_chain_start_torque_trj.end(); it++)
+    {
+        if(it->second)
+        {
+            _map_chain_trj_time.at(it->first) += _dt_ms;
+            double amplitude = 1.; //Nm
+            double period = 0.1;
+
+            rstrt::robot::JointState zero(_map_kin_chains_joints.at(it->first).size());
+            zero.angles.setZero();
+            rstrt::kinematics::JointAngles out(zero.angles.size());
+
+            out = sin_traj(zero, amplitude, _map_chain_trj_time.at(it->first), period);
+            _kinematic_chains_desired_joint_torque_map.at(it->first).torques = out.angles;
+
+            _kinematic_chains_output_torques_ports.at(it->first)->write(
+                        _kinematic_chains_desired_joint_torque_map.at(it->first));
         }
     }
 }
@@ -306,9 +345,27 @@ bool motor_controller_test::stopVoltageOffset(const std::string& chain_name)
 
     _map_chain_start_voltage_trj.at(chain_name) = false;
 
-    _kinematic_chains_desired_joint_state_map.at(chain_name).angles[2] = 0.;
-    _kinematic_chains_output_voltage_ports.at(chain_name)->write(_kinematic_chains_desired_joint_state_map.at(chain_name));
+    return true;
+}
 
+bool motor_controller_test::startTorqueTrj(const std::string &chain_name)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+
+    _map_chain_trj_time.at(chain_name) = 0.0;
+    _map_chain_start_torque_trj.at(chain_name) = true;
+    _map_chain_start_trj.at(chain_name) = false;
+    _map_chain_start_voltage_trj.at(chain_name) = false;
+
+    return true;
+}
+
+bool motor_controller_test::stopTorqueTrj(const std::string &chain_name)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+    _map_chain_start_torque_trj.at(chain_name) = false;
     return true;
 }
 

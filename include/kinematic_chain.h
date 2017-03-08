@@ -128,7 +128,8 @@ public:
     bool setControlMode(const std::string& controlMode);
     void sense();
     void getCommand();
-    void move(int *_tx_position_desired_mRAD, short* _tx_voltage_desired_mV);
+    void move(int *_tx_position_desired_mRAD, short* _tx_voltage_desired_mV,
+              int *_tx_torque_desired_mNm);
     std::string printKinematicChainInformation();
     std::vector<int> getBoardsID();
 

@@ -253,7 +253,8 @@ void rtt_coman::updateHook(){
     if(is_controlled)
     {
         for(it = kinematic_chains.begin(); it != kinematic_chains.end(); it++){
-            it->second->move(_tx_position_desired_mRAD, _tx_voltage_desired_mV);
+            it->second->move(_tx_position_desired_mRAD, _tx_voltage_desired_mV,
+                             _tx_torque_desired_mNm);
 
             if(it->second->getCurrentControlMode() == ControlModes::JointImpedanceCtrl)
             {
@@ -271,6 +272,10 @@ void rtt_coman::updateHook(){
                               sizeof(int)*MAX_MC_BOARDS);
         _boards->set_pid_offset(_tx_voltage_desired_mV,
                                 sizeof(int)*MAX_MC_BOARDS);
+
+        //This is used for the toqrue control
+        _boards->set_gravity_compensation(_tx_torque_desired_mNm,
+                                          sizeof(int)*MAX_MC_BOARDS);
 
     }
 
@@ -341,7 +346,8 @@ bool rtt_coman::startHook()
         it->second->sense();
 
         it->second->setControlMode(ControlModes::JointPositionCtrl);
-        it->second->move(_tx_position_desired_mRAD, _tx_voltage_desired_mV);
+        it->second->move(_tx_position_desired_mRAD, _tx_voltage_desired_mV,
+                         _tx_torque_desired_mNm);
 
         for(unsigned int i = 0; i < boards_id.size(); ++i){
             success += _boards->start_stop_single_control(boards_id[i], true); //for now only position control
