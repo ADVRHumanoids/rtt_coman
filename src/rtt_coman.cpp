@@ -70,6 +70,7 @@ rtt_coman::rtt_coman(const std::string &name):
     this->addOperation("setForceTorqueMeasurementDirection", &rtt_coman::setForceTorqueMeasurementDirection,
                 this, RTT::ClientThread);
 
+    ///DEPRECATED
     this->addOperation("setImpedance", &rtt_coman::setImpedance,
                 this, RTT::ClientThread);
 
@@ -383,13 +384,18 @@ bool rtt_coman::setPID(const std::string &kinematic_chain, const std::vector<int
         log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
         return false;}
 
-    std::vector<std::string> joint_names = kinematic_chains[kinematic_chain]->getJointNames();
-    bool a = true;
-    for(unsigned int i = 0; i < joint_names.size(); ++i)
-        a = a && kinematic_chains[kinematic_chain]->setPID(joint_names[i], P[i], I[i], D[i]);
-    return a;
+    if(kinematic_chains[kinematic_chain]->getCurrentControlMode() == ControlModes::JointPositionCtrl){
+        std::vector<std::string> joint_names = kinematic_chains[kinematic_chain]->getJointNames();
+        bool a = true;
+        for(unsigned int i = 0; i < joint_names.size(); ++i)
+            a = a && kinematic_chains[kinematic_chain]->setPID(joint_names[i], P[i], I[i], D[i]);
+        return a;}
+    else
+        RTT::log(RTT::Warning)<<"setPID can be used only in JointPositionCtrl mode!"<<RTT::endlog();
+    return false;
 }
 
+///DEPRECATED
 bool rtt_coman::setImpedance(const std::string &kinematic_chain, const std::vector<int> &P,
                              const std::vector<int> &D)
 {
