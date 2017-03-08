@@ -70,9 +70,9 @@ rtt_coman::rtt_coman(const std::string &name):
     this->addOperation("setForceTorqueMeasurementDirection", &rtt_coman::setForceTorqueMeasurementDirection,
                 this, RTT::ClientThread);
 
-    ///DEPRECATED
-    this->addOperation("setImpedance", &rtt_coman::setImpedance,
-                this, RTT::ClientThread);
+//    ///DEPRECATED
+//    this->addOperation("setImpedance", &rtt_coman::setImpedance,
+//                this, RTT::ClientThread);
 
 }
 
@@ -401,22 +401,22 @@ bool rtt_coman::setPID(const std::string &kinematic_chain, const std::vector<int
     return false;
 }
 
-///DEPRECATED
-bool rtt_coman::setImpedance(const std::string &kinematic_chain, const std::vector<int> &P,
-                             const std::vector<int> &D)
-{
-    std::vector<std::string> chain_names = getKinematiChains();
-    if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
-        log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
-        return false;}
+/////DEPRECATED
+//bool rtt_coman::setImpedance(const std::string &kinematic_chain, const std::vector<int> &P,
+//                             const std::vector<int> &D)
+//{
+//    std::vector<std::string> chain_names = getKinematiChains();
+//    if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
+//        log(Warning) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
+//        return false;}
 
-    for(unsigned int i = 0; i < P.size(); ++i){
-        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd.stiffness[i] = P[i];
-        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd.damping[i] = D[i];
-        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd_fs = RTT::FlowStatus::NewData;
-        }
-    return true;
-}
+//    for(unsigned int i = 0; i < P.size(); ++i){
+//        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd.stiffness[i] = P[i];
+//        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd.damping[i] = D[i];
+//        kinematic_chains[kinematic_chain]->impedance_controller->joint_cmd_fs = RTT::FlowStatus::NewData;
+//        }
+//    return true;
+//}
 
 void rtt_coman::stopHook()
 {
