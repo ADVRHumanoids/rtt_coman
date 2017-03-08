@@ -98,6 +98,6 @@ NOTE:
 Available controllers are (for now):
 - ***Position Ctrl***
 - ***Voltage Ctrl*** obtained setting the Position Ctrol mode, setting to 0 all the PIDs and sending values in the ```kinematic_chain_JointPositionCtrl_VoltageOffset``` port
-- ***Impedance Ctrl*** implemented as: Inline-style: 
-![alt text](https://gitlab.advrcloud.iit.it/advr_humanoids/rtt_coman/blob/master/joint_impedance_ctrl.gif "Logo Title Text 1")
+- ***Impedance Ctrl*** implemented as: 
+![](joint_impedance_ctrl.gif "Joint Impedance Control")
 
