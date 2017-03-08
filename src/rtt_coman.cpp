@@ -218,6 +218,14 @@ bool rtt_coman::configureHook() {
 
 
 
+        std::map<std::string, int> imu_srdf = _xbotcore_model.get_imu_sensors();
+        RTT::log(RTT::Info) << "Model has " << imu_srdf.size() << " IMUs" << RTT::endlog();
+        std::map<std::string, int>::iterator it = imu_srdf.begin();
+        RTT::log(RTT::Info) <<"on link "<<it->first<<RTT::endlog();
+//        if(_imu != NULL){
+//            RTT::log(RTT::Info) << "Robot has 1 IMU: the imu_3DM_GX3_25 from MicroStrain" <<RTT::endlog();
+//            RTT::log(RTT::Info) << "We will consider just the first IMU from the SRDF" <<RTT::endlog();
+//        }
 
         RTT::log(RTT::Warning) << "Done configuring component" << RTT::endlog();
     }

@@ -49,6 +49,7 @@
 #include <Boards_ctrl_ext.h>
 #include <utils.h>
 
+
 #include <force_torque_sensor.h>
 
 namespace cogimon {
@@ -99,6 +100,8 @@ private:
     bool is_controlled;
 
     boost::shared_ptr<Boards_ctrl_ext> _boards;
+
+
 
     ts_bc_data_t   _ts_bc_data[MAX_DSP_BOARDS];
     int _tx_position_desired_mRAD[MAX_DSP_BOARDS];

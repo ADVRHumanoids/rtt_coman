@@ -93,7 +93,7 @@ file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
 file(GLOB_RECURSE motor_controller_test_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/test" *.h)
 
 orocos_component(${PROJECT_NAME} 
-src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp src/force_torque_sensor.cpp
+src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp src/force_torque_sensor.cpp src/imu_sensor.cpp
 ${rtt_coman_INCLUDES})
 set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
 
@@ -107,6 +107,8 @@ target_link_libraries(${PROJECT_NAME}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
    "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
+   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/libcoman_microstrain.so"
+   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/libcoman_os.so"
 )
 
 orocos_component(motor_controller_test
