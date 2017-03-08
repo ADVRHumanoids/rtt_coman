@@ -46,6 +46,11 @@ motor_controller_test::motor_controller_test(const std::string &name):
     this->addOperation("stopTorqueTrj", &motor_controller_test::stopTorqueTrj,
                 this, RTT::ClientThread);
 
+    this->addOperation("startImpedanceConst", &motor_controller_test::startImpedanceConst,
+                this, RTT::ClientThread);
+    this->addOperation("stopImpedanceConst", &motor_controller_test::stopImpedanceConst,
+                this, RTT::ClientThread);
+
 
     _urdf_model.reset(new urdf::ModelInterface());
 }
@@ -152,6 +157,15 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
                     task_ptr->ports()->getPort(kin_chain_name+"_"+"JointTorqueCtrl"));
 
 
+        _kinematic_chains_output_impedance_ports[kin_chain_name] =
+                boost::shared_ptr<RTT::OutputPort<rstrt::dynamics::JointImpedance> >(
+                            new RTT::OutputPort<rstrt::dynamics::JointImpedance>(
+                                kin_chain_name+"_"+"JointImpedanceCtrl"));
+        this->addPort(*(_kinematic_chains_output_impedance_ports.at(kin_chain_name))).
+                doc(kin_chain_name+"_"+"JointImpedanceCtrl port");
+        _kinematic_chains_output_impedance_ports.at(kin_chain_name)->connectTo(
+                    task_ptr->ports()->getPort(kin_chain_name+"_"+"JointImpedanceCtrl"));
+
 
 
         rstrt::kinematics::JointAngles tmp2(joint_names.size());
@@ -159,6 +173,8 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
         _kinematic_chains_desired_joint_voltage_offset_map[kin_chain_name] = tmp2;
         rstrt::dynamics::JointTorques tmp3(joint_names.size());
         _kinematic_chains_desired_joint_torque_map[kin_chain_name] = tmp3;
+        rstrt::dynamics::JointImpedance tmp4(joint_names.size());
+        _kinematic_chains_desired_joint_impedance_map[kin_chain_name] = tmp4;
         RTT::log(RTT::Info)<<"Added "<<kin_chain_name<<" port and data input"<<RTT::endlog();
 
 
@@ -170,6 +186,8 @@ bool motor_controller_test::attachToRobot(const std::string &robot_name)
         _map_chain_start_voltage_trj[kin_chain_name] = false;
 
         _map_chain_start_torque_trj[kin_chain_name] = false;
+
+        _map_chain_start_impedance_trj[kin_chain_name] = false;
     }
 
     return true;
@@ -225,6 +243,15 @@ void motor_controller_test::updateHook()
         {
             _kinematic_chains_output_voltage_ports.at(it->first)->write(
                         _kinematic_chains_desired_joint_voltage_offset_map.at(it->first));
+        }
+    }
+
+    for(it = _map_chain_start_torque_trj.begin(); it != _map_chain_start_torque_trj.end(); it++)
+    {
+        if(it->second)
+        {
+            _kinematic_chains_output_impedance_ports.at(it->first)->write(
+                        _kinematic_chains_desired_joint_impedance_map.at(it->first));
         }
     }
 
@@ -291,6 +318,8 @@ bool motor_controller_test::startTrj(const std::string &chain_name)
     _map_chain_trj_time.at(chain_name) = 0.0;
     _map_chain_start_trj.at(chain_name) = true;
     _map_chain_start_voltage_trj.at(chain_name) = false;
+    _map_chain_start_torque_trj.at(chain_name) = false;
+    _map_chain_start_impedance_trj.at(chain_name) = false;
 
     return true;
 }
@@ -332,8 +361,11 @@ bool motor_controller_test::startVoltageOffset(const std::string& chain_name, co
     for(unsigned int i = 0; i < offset.size(); ++i)
         _kinematic_chains_desired_joint_voltage_offset_map.at(chain_name).angles[i] = offset[i];
 
-    _map_chain_start_voltage_trj.at(chain_name) = true;
+
     _map_chain_start_trj.at(chain_name) = false;
+    _map_chain_start_voltage_trj.at(chain_name) = true;
+    _map_chain_start_torque_trj.at(chain_name) = false;
+    _map_chain_start_impedance_trj.at(chain_name) = false;
 
     return a;
 }
@@ -354,9 +386,10 @@ bool motor_controller_test::startTorqueTrj(const std::string &chain_name)
         return false;
 
     _map_chain_trj_time.at(chain_name) = 0.0;
-    _map_chain_start_torque_trj.at(chain_name) = true;
     _map_chain_start_trj.at(chain_name) = false;
     _map_chain_start_voltage_trj.at(chain_name) = false;
+    _map_chain_start_torque_trj.at(chain_name) = true;
+    _map_chain_start_impedance_trj.at(chain_name) = false;
 
     return true;
 }
@@ -366,6 +399,27 @@ bool motor_controller_test::stopTorqueTrj(const std::string &chain_name)
     if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
         return false;
     _map_chain_start_torque_trj.at(chain_name) = false;
+    return true;
+}
+
+bool motor_controller_test::startImpedanceConst(const std::string& chain_name, const std::vector<double>& stiffness,
+                         const std::vector<double>& damping)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+
+    for(unsigned int i = 0; i < stiffness.size(); ++i){
+        _kinematic_chains_desired_joint_impedance_map.at(chain_name).stiffness[i] = stiffness[i];
+        _kinematic_chains_desired_joint_impedance_map.at(chain_name).damping[i] = damping[i];
+    }
+    return true;
+}
+
+bool motor_controller_test::stopImpedanceConst(const std::string& chain_name)
+{
+    if ( _map_kin_chains_joints.find(chain_name) == _map_kin_chains_joints.end() )
+        return false;
+    _map_chain_start_impedance_trj.at(chain_name) = false;
     return true;
 }
 

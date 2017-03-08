@@ -53,6 +53,7 @@ private:
     std::map<std::string, bool> _map_chain_start_trj;
     std::map<std::string, bool> _map_chain_start_voltage_trj;
     std::map<std::string, bool> _map_chain_start_torque_trj;
+    std::map<std::string, bool> _map_chain_start_impedance_trj;
 
     std::map<std::string, boost::shared_ptr<RTT::InputPort<rstrt::robot::JointState> > > _kinematic_chains_feedback_ports;
     std::map<std::string, rstrt::robot::JointState> _kinematic_chains_joint_state_map;
@@ -60,9 +61,12 @@ private:
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_ports;
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::kinematics::JointAngles> > > _kinematic_chains_output_voltage_ports;
     std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::dynamics::JointTorques> > > _kinematic_chains_output_torques_ports;
+    std::map<std::string, boost::shared_ptr<RTT::OutputPort<rstrt::dynamics::JointImpedance> > > _kinematic_chains_output_impedance_ports;
     std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_state_map;
     std::map<std::string, rstrt::kinematics::JointAngles> _kinematic_chains_desired_joint_voltage_offset_map;
     std::map<std::string, rstrt::dynamics::JointTorques> _kinematic_chains_desired_joint_torque_map;
+    std::map<std::string, rstrt::dynamics::JointImpedance> _kinematic_chains_desired_joint_impedance_map;
+
 
     std::map<std::string, std::pair<double, double>> _map_joint_limimts;
 
@@ -73,6 +77,10 @@ private:
 
     bool startVoltageOffset(const std::string& chain_name, const std::vector<double>& offset);
     bool stopVoltageOffset(const std::string& chain_name);
+
+    bool startImpedanceConst(const std::string& chain_name, const std::vector<double>& stiffness,
+                             const std::vector<double>& damping);
+    bool stopImpedanceConst(const std::string& chain_name);
 
     bool startTorqueTrj(const std::string& chain_name);
     bool stopTorqueTrj(const std::string& chain_name);
