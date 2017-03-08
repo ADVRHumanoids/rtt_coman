@@ -90,7 +90,7 @@ The following set of ports is generated for each kinematic chain of the robot
 Output Ports:
 ------------
 The following port is generated for each kinematic chain of the robot
-- ***kinematic_chain_JointFeedback*** joints position, velcity and torque feedback
+- ***kinematic_chain_JointFeedback*** joints position, velocity and torque feedback
 - ***name_ft_SensorFeedback*** force/torque sensor feedback
 
 NOTE:
@@ -98,6 +98,13 @@ NOTE:
 Available controllers are (for now):
 - ***Position Ctrl***
 - ***Voltage Ctrl*** obtained setting the Position Ctrol mode, setting to 0 all the PIDs and sending values in the ```kinematic_chain_JointPositionCtrl_VoltageOffset``` port
-- ***Impedance Ctrl*** implemented as: 
-![](joint_impedance_ctrl.gif "Joint Impedance Control")
+- ***Impedance Ctrl*** implemented at the DSPs level as: 
 
+![](joint_impedance_ctrl.gif "Joint Impedance Control") 
+- ***Torque Ctrl*** 
+
+It is important to notice that the component allows to switch between controllers in the following way
+- from ***Position Ctrl*** to ***Impedance Ctrl*** and ***Torque Ctrl*** but ***NOT*** vice versa 
+- from ***Voltage Ctrl*** to ***Impedance Ctrl*** and ***Torque Ctrl*** but ***NOT*** vice versa
+- from ***Position Ctrl*** to ***Voltage Ctrl*** and vice versa 
+- from ***Impedance Ctrl*** to ***Torque Ctrl*** and vice versa
