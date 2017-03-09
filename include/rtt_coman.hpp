@@ -51,6 +51,7 @@
 
 
 #include <force_torque_sensor.h>
+#include <imu_sensor.h>
 
 namespace cogimon {
 
@@ -87,6 +88,7 @@ protected:
 
     std::map<std::string, boost::shared_ptr<KinematicChain>> kinematic_chains;
     std::vector<force_torque_sensor> force_torque_sensors;
+    std::vector<imu_sensor> imu_sensors;
 
     XBot::XBotCoreModel _xbotcore_model;
     bool _models_loaded;
