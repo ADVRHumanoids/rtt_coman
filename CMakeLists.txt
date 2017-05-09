@@ -97,6 +97,21 @@ src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp src/force_torque_sensor
 ${rtt_coman_INCLUDES})
 set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
 
+
+if($ENV{OROCOS_TARGET} STREQUAL "xenomai")
+target_link_libraries(${PROJECT_NAME}
+   ${USE_OROCOS_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
+   ${OROCOS-RTT_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${RST-RT_LIBRARIES}
+   ${TINYXML_LIBRARIES}
+   ${srdfdom_advr_LIBRARIES}
+   ${XBotCoreModel_LIBRARIES}
+   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
+   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/libcoman_os_rt.so"
+)
+else()
 target_link_libraries(${PROJECT_NAME}
    ${USE_OROCOS_LIBRARIES}
    ${orocos_kdl_LIBRARIES}
@@ -108,6 +123,7 @@ target_link_libraries(${PROJECT_NAME}
    ${XBotCoreModel_LIBRARIES}
    "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
 )
+endif() 
 
 orocos_component(motor_controller_test
 src/test/motor_controller_test.cpp
