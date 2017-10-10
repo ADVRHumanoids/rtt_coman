@@ -1,0 +1,13 @@
+#
+board_ctrl:
+  eth_iface: rteth0
+  boards_num: 35 #27 # 23 mcs + 2 fts
+
+# assume boards of same type have the same policy bc_rate !!! 
+
+mc_board:
+  bc_rate: 2
+
+ft_board:
+  bc_rate: 2
+  calibrate_offset: true
