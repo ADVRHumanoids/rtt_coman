@@ -1,7 +1,7 @@
 rtt_coman
 =========
 
-This package implements an OROCOS component for communicating with the COMAN Robot through the Robolli library. 
+This package implements an OROCOS component for communicating with the COMAN Robot through the Robolli library (IMPORTANT: libyaml 0.5.1-1 compatible ONLY!). 
 
 How it works:
 -------------
