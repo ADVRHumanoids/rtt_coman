@@ -184,9 +184,16 @@ protected:
     /**
      * @brief getCtrlBoardIndices retrieves IDs of control board used internally by robolli
      * @param kinematic_chain
-     * @return
+     * @return empty vector if errors happens
      */
     std::vector<int> getCtrlBoardIndices(const std::string& kinematic_chain);
+
+    /**
+     * @brief getFTBoardIndex retrieves Force/Torque sensors index
+     * @param force_torque_frame
+     * @return -1 if error happens
+     */
+    int getFTBoardIndex(const std::string& force_torque_frame);
 //    ///DEPRECATED
 //    bool setImpedance(const std::string& kinematic_chain, const std::vector<int>& P,
 //                const std::vector<int>& D);

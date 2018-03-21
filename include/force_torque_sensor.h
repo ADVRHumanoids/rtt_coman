@@ -70,6 +70,8 @@ public:
     void sense();
     std::string getFrame(){ return _force_torque_frame;}
 
+    int getBoardID(){return _ft_ID->boards_id[0];}
+
     bool setMeasurementDirection(const std::vector<int>& directions);
 private:
     /**

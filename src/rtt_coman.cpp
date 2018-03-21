@@ -72,10 +72,28 @@ rtt_coman::rtt_coman(const std::string &name):
 
     this->addOperation("getCtrlBoardIndices", &rtt_coman::getCtrlBoardIndices, this, RTT::ClientThread);
 
+    this->addOperation("getFTBoardIndex", &rtt_coman::getFTBoardIndex, this, RTT::ClientThread);
+
 //    ///DEPRECATED
 //    this->addOperation("setImpedance", &rtt_coman::setImpedance,
 //                this, RTT::ClientThread);
 
+}
+
+int rtt_coman::getFTBoardIndex(const std::string& force_torque_frame)
+{
+    if(is_configured)
+    {
+        for(unsigned int i = 0; i < force_torque_sensors.size(); ++i)
+        {
+            if(force_torque_frame.compare(force_torque_sensors[i].getFrame()) == 0)
+                return force_torque_sensors[i].getBoardID();
+        }
+        RTT::log(RTT::Error)<<"Force Torque frame "<<force_torque_frame<<" can not be found"<<RTT::endlog();
+        return -1;
+    }
+    RTT::log(RTT::Warning)<<"Component has to be configured before reading FTBoard index!"<<RTT::endlog();
+    return -1;
 }
 
 std::vector<int> rtt_coman::getCtrlBoardIndices(const std::string& kinematic_chain)
