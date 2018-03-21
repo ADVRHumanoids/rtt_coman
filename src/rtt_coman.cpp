@@ -70,9 +70,29 @@ rtt_coman::rtt_coman(const std::string &name):
     this->addOperation("setForceTorqueMeasurementDirection", &rtt_coman::setForceTorqueMeasurementDirection,
                 this, RTT::ClientThread);
 
+    this->addOperation("getCtrlBoardIndices", &rtt_coman::getCtrlBoardIndices, this, RTT::ClientThread);
+
 //    ///DEPRECATED
 //    this->addOperation("setImpedance", &rtt_coman::setImpedance,
 //                this, RTT::ClientThread);
+
+}
+
+std::vector<int> rtt_coman::getCtrlBoardIndices(const std::string& kinematic_chain)
+{
+    std::vector<std::string> chain_names = getKinematiChains();
+    if(is_configured)
+    {
+        if(!(std::find(chain_names.begin(), chain_names.end(), kinematic_chain) != chain_names.end())){
+            log(Error) << "Kinematic Chain " << kinematic_chain << " is not available!" << endlog();
+            return std::vector<int>();
+        }
+        else
+            return kinematic_chains[kinematic_chain]->getBoardsID();
+
+    }
+    RTT::log(RTT::Warning)<<"Component has to be configured before reading CtrlBoard indices!"<<RTT::endlog();
+    return std::vector<int>();
 
 }
 

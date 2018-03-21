@@ -26,6 +26,10 @@
 
 namespace cogimon {
 
+/**
+ * @brief The parsed_words struct this struct parse the srdf file generated which contains the available controller
+ * as well as the gains (which are NOT used here!).
+ */
 struct parsed_words{
         static constexpr const char* robot_tag = "robot";
         static constexpr const char* rtt_gazebo_tag = "rtt-gazebo";
