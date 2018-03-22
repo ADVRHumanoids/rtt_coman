@@ -52,12 +52,6 @@ find_package(Boost COMPONENTS thread REQUIRED)
 find_package(srdfdom_advr REQUIRED)
 find_package(XBotCoreModel REQUIRED)
 
-find_package(RST-RT REQUIRED)
-message(STATUS "RST-RT version: ${RST-RT_VERSION}")
-include_directories(BEFORE SYSTEM ${RST-RT_INCLUDE_DIRS})
-add_definitions(${RST-RT_CFLAGS})
-link_directories(${RST-RT_LIBRARY_DIR} ${RST-RT_LIBRARY_DIRS})
-
 find_package(PkgConfig REQUIRED)
 pkg_search_module(TINYXML REQUIRED tinyxml)
 if(NOT TINYXML_INCLUDE_DIR)
@@ -75,26 +69,22 @@ message(STATUS "TINYXML_LIBRARY_DIR: ${TINYXML_LIBRARY_DIR}")
 message(STATUS "TINYXML_INCLUDE_DIR: ${TINYXML_INCLUDE_DIRS}")
 message(STATUS "TINYXML_LIBRARY: ${TINYXML_LIBRARY}")
 
-#find_package(COMAN_shared REQUIRED)
-
 include_directories(
                   include
                   ${Boost_INCLUDE_DIR}
                   ${Eigen_INCLUDE_DIRS}
                   ${orocos_kdl_INCLUDE_DIRS}
                   ${USE_OROCOS_INCLUDE_DIRS}
-                  ${RST-RT_INCLUDE_DIRS}
                   ${TINYXML_INCLUDE_DIRS}
                   ${srdfdom_advr_INCLUDE_DIRS}
                   ${XBotCoreModel_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE rtt_coman_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" *.h)
-file(GLOB_RECURSE motor_controller_test_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/test" *.h)
 
-orocos_component(${PROJECT_NAME} 
-src/rtt_coman.cpp src/kinematic_chain.cpp src/parser.cpp src/force_torque_sensor.cpp
-${rtt_coman_INCLUDES})
+orocos_component(   ${PROJECT_NAME} 
+                    src/rtt_coman.cpp 
+                    ${rtt_coman_INCLUDES})
 set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
 
 
@@ -104,12 +94,9 @@ target_link_libraries(${PROJECT_NAME}
    ${orocos_kdl_LIBRARIES}
    ${OROCOS-RTT_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${RST-RT_LIBRARIES}
    ${TINYXML_LIBRARIES}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
-   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
-   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/libcoman_os_rt.so"
 )
 else()
 target_link_libraries(${PROJECT_NAME}
@@ -117,29 +104,12 @@ target_link_libraries(${PROJECT_NAME}
    ${orocos_kdl_LIBRARIES}
    ${OROCOS-RTT_LIBRARIES}
    ${Boost_LIBRARIES}
-   ${RST-RT_LIBRARIES}
    ${TINYXML_LIBRARIES}
    ${srdfdom_advr_LIBRARIES}
    ${XBotCoreModel_LIBRARIES}
-   "$ENV{ROBOTOLOGY_ROOT}/build/install/lib/librobolli.so"
 )
 endif() 
 
-orocos_component(motor_controller_test
-src/test/motor_controller_test.cpp
-${motor_controller_test_INCLUDES})
-set_property(TARGET motor_controller_test APPEND PROPERTY COMPILE_DEFINITIONS RTT_COMPONENT)
-
-target_link_libraries(motor_controller_test
-   ${USE_OROCOS_LIBRARIES}
-   ${orocos_kdl_LIBRARIES}
-   ${OROCOS-RTT_LIBRARIES}
-   ${Boost_LIBRARIES}
-   ${RST-RT_LIBRARIES}
-   ${TINYXML_LIBRARIES}
-   ${srdfdom_advr_LIBRARIES}
-   ${XBotCoreModel_LIBRARIES}
-)
 
 install (TARGETS
          LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
